@@ -86,7 +86,7 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  res.sendFile("account-register.html", { root: `${__dirname}/pages`});
+  res.sendFile("register.html", { root: `${__dirname}/pages`});
 });
 
 /*
@@ -177,7 +177,7 @@ app.post("/api/register", (req, res) => {
 
 // catch 404 error
 app.get("*", (req, res) => {
-  res.status(404).send("not found");
+  res.sendFile("404.html", { root: `${__dirname}/pages`});
 });
 
 // listen

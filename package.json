@@ -4,7 +4,7 @@
   "description": "## Contesto Si deve svolgere un’ ICO (Initial coin offering) di un nuovo token realizzato on-top della blockchain Ethereum. Si vuole creare una piattaforma web per gestire l’acquisto e la gestione dei tokens. Come capita spesso in questi casi alcuni investitori hanno fornito del denaro quando ancora non era disponibile lo smart contract sulla blockchain: andranno quindi ricompensati automaticamente alla creazione del contratto con dei token. investitore 1: 10.000$ investitore 2: 25.000$ investitore 3: 100.000$ ciascuno degli investitori ha comprato i token al prezzo promozionale in prevendita di 0.01$ a token.",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",

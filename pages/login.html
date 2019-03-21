@@ -1,0 +1,57 @@
+<!doctype html>
+
+<html lang='en'>
+<head>
+  <meta charset='utf-8'>
+
+  <title>Login</title>
+  <meta name='description' content='sf-academy login'>
+  <meta name='author' content='Daniele Servadei'>
+
+  <!-- <link rel='stylesheet' href='css/styles.css?v=1.0'> -->
+
+</head>
+
+<body>
+  <input id='username'>
+  <br>
+  <input id='password'>
+  <br>
+  <button id='login-button'>Login</button>
+  <script>
+    const button = document.getElementById('login-button');
+    button.onclick = () => {
+      login();
+    }
+
+    const login = () => {
+      let username = document.getElementById('username').value;
+      let password = document.getElementById('password').value;
+
+      fetch(`http://localhost:8080/api/login`, {
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: 'daniele'
+        })
+      })
+      .then((res) => {
+          if (res.status !== 200) {
+            console.log(res);
+            return;
+          }
+
+          res.text().then(function (text) {
+            console.log(text)
+          });
+        }
+      )
+      .catch((err) => {
+        console.log(`Fetch Error :-S ${err}`);
+      });
+    }
+  </script>
+</body>
+</html>

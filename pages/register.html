@@ -1,0 +1,62 @@
+<!doctype html>
+
+<html lang='en'>
+<head>
+  <meta charset='utf-8'>
+
+  <title>Register</title>
+  <meta name='description' content='sf-academy login'>
+  <meta name='author' content='Daniele Servadei'>
+
+  <!-- <link rel='stylesheet' href='css/styles.css?v=1.0'> -->
+
+</head>
+
+<body>
+  <input placeholder="username" id='username'>
+  <br>
+  <input placeholder="password" id='password'>
+  <br>
+  <input placeholder="email" id='email'>
+  <br>
+  <button id='login-button'>Register</button>
+  <script>
+    const button = document.getElementById('login-button');
+    button.onclick = () => {
+      register();
+    }
+
+    const register = () => {
+      let username = document.getElementById('username').value;
+      let password = document.getElementById('password').value;
+      let email = document.getElementById('email').value;
+
+      fetch(`http://localhost:8080/api/register`, {
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password,
+          email: email
+        })
+      })
+      .then((res) => {
+          if (res.status !== 200) {
+            
+            return;
+          }
+
+          res.text().then(function (text) {
+            console.log(text)
+          });
+        }
+      )
+      .catch((err) => {
+        console.log(`Fetch Error :-S ${err}`);
+      });
+    }
+  </script>
+</body>
+</html>

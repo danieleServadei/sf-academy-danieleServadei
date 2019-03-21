@@ -10,6 +10,7 @@ const salt = config.salt;
 const rounds = config.rounds;
 const bodyParser = require("body-parser")
 const session = require("express-session");
+const { logged, randomString } = require("./functions");
 const port = 8080;
 
 const connection = mysql.createConnection({
@@ -28,10 +29,27 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json())
 app.use(session({
   secret: "just a secret",
-  resave: false,
+  resave: true,
   saveUninitialized: true,
-  cookie: { secure: true }
+  cookie: { secure: false }
 }))
+
+app.get("/index", (req, res) => {
+  logged(req).then(() => {
+    res.sendFile("index.html", { root: `${__dirname}/pages`});
+  }).catch(() => {
+    res.redirect("/login");
+  })
+});
+
+// testing purposes
+app.get("/autologin", (req, res) => {
+  req.session.userId = 1;
+  req.session.email = "daniele@gmail.com";
+  req.session.username = "daniele";
+  req.session.wallet = "EjOTgKyKzGt2DrkK9FjxeOsk3x32X9EEKEEZE8jTtxVwiYXC4i7NFoMKhsdIqLz4";
+  res.redirect("/index");
+});
 
 app.get("/login", (req, res) => {
   res.sendFile("login.html", { root: `${__dirname}/pages`});
@@ -42,7 +60,25 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/api/login", (req, res) => {
-  res.status(200).json(req.body);
+  const { email, password } = req.body;
+  connection.query('SELECT * FROM users WHERE email = ?', [email], (error, results, fields) => {
+    if (results[0]) {
+      const hash = results[0].password;
+      bcrypt.compare(`${password}${salt}`, hash, (err, compared) => {
+        if (compared) {
+          req.session.userId = results[0].id;
+          req.session.email = results[0].email;
+          req.session.username = results[0].username;
+          req.session.wallet = results[0].wallet;
+          res.status(200).send("user authenticated");
+        } else {
+          res.status(200).send("invalid password");
+        }
+      });
+    } else {
+      res.status(200).send("invalid email");
+    }
+  });
 });
 
 app.post("/api/register", (req, res) => {
@@ -55,24 +91,14 @@ app.post("/api/register", (req, res) => {
       res.status(200).send("user already exist");
     } else {
       bcrypt.hash(`${password}${salt}`, rounds, (err, hash) => {
-      connection.query('INSERT INTO users (username, email, password, wallet) VALUES (?, ?, ?, ?);', [username, email, hash, wallet], (error, results, fields) => {
-        if (error) throw error;
-        res.status(200).send("user created");
+        connection.query('INSERT INTO users (username, email, password, wallet) VALUES (?, ?, ?, ?);', [username, email, hash, wallet], (error, results, fields) => {
+          if (error) throw error;
+          res.status(200).send("user created");
+        });
       });
-    });
     }
   });
 });
-
-const randomString = (length) => {
-  let text = "";
-  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-  for (let i = 0; i < length; i++)
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-  return text;
-}
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}!`);

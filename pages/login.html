@@ -13,9 +13,9 @@
 </head>
 
 <body>
-  <input id='username'>
+  <input placeholder="email" id='email'>
   <br>
-  <input id='password'>
+  <input placeholder="password" id='password'>
   <br>
   <button id='login-button'>Login</button>
   <script>
@@ -25,7 +25,7 @@
     }
 
     const login = () => {
-      let username = document.getElementById('username').value;
+      let email = document.getElementById('email').value;
       let password = document.getElementById('password').value;
 
       fetch(`http://localhost:8080/api/login`, {
@@ -34,7 +34,8 @@
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          username: 'daniele'
+          email: email,
+          password: password
         })
       })
       .then((res) => {

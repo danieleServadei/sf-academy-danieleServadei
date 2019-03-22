@@ -50,10 +50,3 @@ node_modules
 
 # Security
 config.json
-
-# Pages
-pages/buy-ico.html
-pages/faq.html
-pages/wallet.html
-pages/transactions.html
-pages/dashboard.html

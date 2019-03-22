@@ -5,8 +5,6 @@ html {
     height: 100%;
     background-color: #F4F5FA;
     direction: ltr; }
-    html body.fixed-navbar {
-      padding-top: 5rem; }
     html body a {
       color: #1B65D3; }
       html body a:hover {

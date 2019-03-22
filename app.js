@@ -21,6 +21,11 @@ const session = require("express-session");
 const { logged, randomString } = require("./functions");
 const port = 80;
 
+// pages root directory
+const dir = {
+  root: `${__dirname}/pages`
+};
+
 // Connect to RDS DB
 const connection = mysql.createConnection({
   host: config.mysqlHost,
@@ -46,6 +51,24 @@ app.use(session({
   cookie: { secure: false }
 }))
 
+// Authentication needed middleware
+app.use(["/dashboard", "/buy-ico", "/wallet", "/transactions", "/faq", "/profile"], (req, res, next) => {
+  logged(req).then(() => {
+    next();
+  }).catch(() => {
+    res.redirect("/login");
+  })
+})
+
+// Login and Register redirect to dashboard
+app.use(["/login", "/register"], (req, res, next) => {
+  logged(req).then(() => {
+    res.redirect("/dashboard");
+  }).catch(() => {
+    next();
+  })
+})
+
 /*
 
 /index
@@ -70,23 +93,39 @@ app.get("/index", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.sendFile("index.html", { root: `${__dirname}/pages`});
+  res.sendFile("index.html", dir);
 });
 
 app.get("/dashboard", (req, res) => {
-  logged(req).then(() => {
-    res.sendFile("dashboard.html", { root: `${__dirname}/pages`});
-  }).catch(() => {
-    res.redirect("/login");
-  })
+  res.sendFile("dashboard.html", dir);
+});
+
+app.get("/buy-ico", (req, res) => {
+  res.sendFile("buy-ico.html", dir);
+});
+
+app.get("/wallet", (req, res) => {
+  res.sendFile("wallet.html", dir);
+});
+
+app.get("/transactions", (req, res) => {
+  res.sendFile("transactions.html", dir);
+});
+
+app.get("/faq", (req, res) => {
+  res.sendFile("faq.html", dir);
+});
+
+app.get("/profile", (req, res) => {
+  res.sendFile("profile.html", dir);
 });
 
 app.get("/login", (req, res) => {
-  res.sendFile("login.html", { root: `${__dirname}/pages`});
+  res.sendFile("login.html", dir);
 });
 
 app.get("/register", (req, res) => {
-  res.sendFile("register.html", { root: `${__dirname}/pages`});
+  res.sendFile("register.html", dir);
 });
 
 /*

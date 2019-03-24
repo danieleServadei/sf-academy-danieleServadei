@@ -14,7 +14,7 @@ const nav = `
 <!-- ////////////////////////////////////////////////////////////////////////////-->
 <div class="main-menu menu-fixed menu-dark menu-bg-default rounded menu-accordion menu-shadow">
   <div class="main-menu-content">
-    <a class="navigation-brand d-none d-md-block d-lg-block d-xl-block" href="index.html"></a>
+    <a class="navigation-brand d-none d-md-block d-lg-block d-xl-block" href="dashboard"></a>
     <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
       <li class="nav-item" id="dashboard"><a href="dashboard"><i class="icon-grid"></i><span class="menu-title" data-i18n="">Dashboard</span></a>
       </li>

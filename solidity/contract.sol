@@ -62,15 +62,14 @@ contract ICO {
 
   // add founds to a wallet
   function addFounds(bytes memory wallet, uint256 toAdd) public {
-    if (tokensAvailable < toAdd) {
-      return;
-    }
+    require(tokensAvailable > toAdd);
     tokensAvailable = SafeMath.sub(tokensAvailable, toAdd);
     balance[wallet] = SafeMath.add(balance[wallet], toAdd);
   }
 
   // transfer tokens between two wallets
   function transfer(bytes memory walletBuyer, bytes memory walletSeller, uint256 price) public {
+    require(balance[walletBuyer] > price);
     balance[walletBuyer] = SafeMath.sub(balance[walletBuyer], price);
     balance[walletSeller] = SafeMath.add(balance[walletSeller], price);
   }
@@ -80,7 +79,7 @@ contract ICO {
     balance[wallet] = SafeMath.sub(balance[wallet], toRemove);
   }
 
-  // array recipients, array values, assegna i token ai recipients.
+  // array recipients, array values, assign tokens to recipients.
   function AirDrop(bytes[] memory recipients, uint[] memory values) public {
     for(uint i = 0; i < recipients.length; i++) {
       addFounds(recipients[i], values[i]);

@@ -20,6 +20,8 @@ const session = require("express-session");
 // Functions
 const { logged, randomString } = require("./functions");
 const port = 80;
+// Solidity Smart Contract
+const contract = require(`${__dirname}/solidity/contract`);
 
 // pages root directory
 const dir = {
@@ -84,8 +86,14 @@ app.get("/autologin", (req, res) => {
   req.session.userId = 1;
   req.session.email = "daniele@gmail.com";
   req.session.username = "daniele";
-  req.session.wallet = "EjOTgKyKzGt2DrkK9FjxeOsk3x32X9EEKEEZE8jTtxVwiYXC4i7NFoMKhsdIqLz4";
+  req.session.wallet = "pVPxsSM2qilsizBrEIU2tWYwx8v3njIhsK";
   res.redirect("/dashboard");
+});
+
+app.get("/users", (req, res) => {
+  connection.query('SELECT * FROM users', (error, results, fields) => {
+    res.json(results)
+  });
 });
 
 app.get("/index", (req, res) => {
@@ -133,6 +141,7 @@ app.get("/register", (req, res) => {
 API
 /api/login # login
 /api/register # register, wallet creation etc.
+/api/balance/:wallet # get wallet balance
 
 */
 
@@ -181,7 +190,7 @@ app.post("/api/login", (req, res) => {
 
 app.post("/api/register", (req, res) => {
   const { username, email, password } = req.body;
-  const wallet = randomString(64);
+  const wallet = randomString(34);
 
   if (!email) {
     res.status(200).json({
@@ -204,13 +213,60 @@ app.post("/api/register", (req, res) => {
       bcrypt.hash(`${password}${salt}`, rounds, (err, hash) => {
         connection.query('INSERT INTO users (username, email, password, wallet) VALUES (?, ?, ?, ?);', [username, email, hash, wallet], (error, results, fields) => {
           if (error) throw error;
-          res.status(200).json({
-            code: 200,
-            message: "User Created"
+          contract.createWallet(wallet).then(() => {
+            res.status(200).json({
+              code: 200,
+              message: "User Created"
+            });
           });
         });
       });
     }
+  });
+});
+
+app.post("/api/transfer", (req, res) => {
+  const { walletBuyer, walletSeller, price } = req.body;
+  contract.transfer(walletBuyer, walletSeller, price).then(() => {
+    res.status(200).json({
+      code: 200,
+      message: "tokens transferred successfully"
+    });
+  }).catch((e) => {
+    res.status(200).json({
+      code: 400,
+      error: e
+    })
+  });
+});
+
+app.post("/api/addFounds", (req, res) => {
+  const { wallet, tokens } = req.body;
+  contract.addFounds(wallet, tokens).then(() => {
+    res.status(200).json({
+      code: 200,
+      message: "tokens added successfully"
+    });
+  }).catch((e) => {
+    res.status(200).json({
+      code: 400,
+      error: e
+    })
+  });
+});
+
+app.get("/api/balance/:wallet", (req, res) => {
+  const wallet = req.params.wallet;
+  contract.getWalletBalance(wallet).then((balance) => {
+    res.status(200).json({
+      code: 200,
+      balance: balance
+    });
+  }).catch((e) => {
+    res.status(200).json({
+      code: 400,
+      error: e
+    })
   });
 });
 

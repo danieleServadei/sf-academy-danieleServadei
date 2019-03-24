@@ -4,7 +4,7 @@ const cjson = require("cjson")
 const TX = require('ethereumjs-tx')
 // Config and credentials
 const fs = require("fs");
-const config = JSON.parse(fs.readFileSync("config.json", "utf8"));
+const config = JSON.parse(fs.readFileSync(`${__dirname}/../config.json`, "utf8"));
 // contract details
 const provider = config.provider;
 const contractAddress = config.contractAddress;
@@ -13,55 +13,83 @@ const defaultAccount = config.defaultAccount;
 const etherscanLink = config.etherscanLink;
 // initiate the web3
 const web3 = new Web3(provider)
-const abi = cjson.load(path.resolve("abi.json"));
+const abi = JSON.parse(fs.readFileSync(`${__dirname}/abi.json`, "utf8"));
 const contract = new web3.eth.Contract(abi, contractAddress);
+const { toHex, toAscii } = web3.utils
 
-
-/*
-
-TODO
-smart contract functions
-backend and frontend related
-
-*/
-
-
-// functions
-const voteForCandidate = (bytes32) => {
-  const voted = contract.methods.voteForCandidate(bytes32);
-  return sendSignTransaction(voted);
-}
-
-const totalVotesFor = (bytes32) => {
+// Create a new wallet
+const createWallet = (wallet) => {
+  wallet = toHex(wallet);
   return new Promise((resolve, reject) => {
-    const call = contract.methods.totalVotesFor(bytes32).call().then((val) => {
-      resolve(val);
-    })
+    const create = contract.methods.createWallet(wallet);
+    resolve(sendSignTransaction(create));
   });
 }
 
-const getAddress = (candidate) => {
-  const bytes32 = web3.utils.asciiToHex(candidate);
-  return bytes32;
-}
-
-const isValid = (bytes32) => {
+// add tokens into a wallet
+const addFounds = (wallet, toAdd) => {
+  wallet = toHex(wallet);
   return new Promise((resolve, reject) => {
-    const call = contract.methods.validCandidate(bytes32).call().then((val) => {
-      resolve(val);
-    })
+    const add = contract.methods.addFounds(wallet, toAdd);
+    resolve(sendSignTransaction(add));
   });
 }
 
-// initiate the contract with null value
-let contract = null;
+// remove tokens from a wallet
+const removeFounds = (wallet, toRemove) => {
+  wallet = toHex(wallet);
+  return new Promise((resolve, reject) => {
+    const remove = contract.methods.removeFounds(wallet, toRemove);
+    resolve(sendSignTransaction(remove));
+  });
+}
 
-// convert Wei to Eth
-const convertWeiToEth = (stringValue) => {
-  if (typeof stringValue != "string") {
-    stringValue = String(stringValue);
+// transfer tokens between two wallets
+const transfer = (walletBuyer, walletSeller, price) => {
+  balanceWalletBuyer = getWalletBalance(walletBuyer).then((balance) => {
+    if (balance < price) {
+      reject("You do not have enough tokens.");
+    }
+
+    walletBuyer = toHex(walletBuyer);
+    walletSeller = toHex(walletSeller);
+
+    return new Promise((resolve, reject) => {
+      const transfer = contract.methods.transfer(walletBuyer, walletSeller, price);
+      resolve(sendSignTransaction(transfer));
+    });
+  });
+}
+
+// array recipients, array values, assegna i token ai recipients.
+const AirDrop = (recipients, values) => {
+  toHexRecipients = [];
+  for (let i in recipients) {
+    toHexRecipients.push(toHex(recipients[i]));
   }
-  return web3.utils.fromWei(stringValue, "ether");
+  return new Promise((resolve, reject) => {
+    const airdrop = contract.methods.AirDrop(toHexRecipients, values);
+    resolve(sendSignTransaction(airdrop));
+  });
+}
+
+// get tokens balance of a wallet
+const getWalletBalance = (wallet) => {
+  wallet = toHex(wallet);
+  return new Promise((resolve, reject) => {
+    const call = contract.methods.walletBalance(wallet).call().then((val) => {
+      resolve(val);
+    })
+  });
+}
+
+// total ICO tokens availabe
+const getTokensAvailable = () => {
+  return new Promise((resolve, reject) => {
+    const call = contract.methods.tokensAvailable().call().then((val) => {
+      resolve(val);
+    })
+  });
 }
 
 const sendSignTransaction = async (rawTrans) => {
@@ -118,10 +146,20 @@ const sendSigned = async (tx) => {
   })
 }
 
+// convert Wei to Eth
+const convertWeiToEth = (stringValue) => {
+  if (typeof stringValue != "string") {
+    stringValue = String(stringValue);
+  }
+  return web3.utils.fromWei(stringValue, "ether");
+}
+
 module.exports = {
-  vote: voteForCandidate,
-  getVotes: totalVotesFor,
-  getAddress: getAddress,
-  valid: isValid,
-  web3: web3
+  createWallet: createWallet,
+  addFounds: addFounds,
+  removeFounds: removeFounds,
+  transfer: transfer,
+  AirDrop: AirDrop,
+  getWalletBalance: getWalletBalance,
+  getTokensAvailable: getTokensAvailable
 }

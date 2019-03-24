@@ -47,48 +47,51 @@
                         <div class="col-md-12 col-12">
                           <div class="row">
                             <div class="col-12 col-md-4">
-                              <p class="text-bold-700 text-uppercase mb-0">Transactions</p>
-                              <p class="mb-0">12/14</p>
+                              <p class="text-bold-700 text-uppercase mb-0">Transactions Count</p>
+                              <p class="mb-0" id="total-transactions"><%= transactions_count %></p>
                             </div>
                             <div class="col-12 col-md-4">
-                              <p class="text-bold-700 text-uppercase mb-0">Last login</p>
-                              <p class="mb-0">2018-04-30 16:44:04</p>
-                            </div>
-                            <div class="col-12 col-md-4">
-                              <p class="text-bold-700 text-uppercase mb-0">IP</p>
-                              <p class="mb-0">43.228.229.172</p>
+                              <p class="text-bold-700 text-uppercase mb-0">Registered Since</p>
+                              <p class="mb-0" id="register-date"><%= register_date %></p>
                             </div>
                           </div>
                           <hr/>
-                          <form class="form-horizontal form-user-profile row mt-2" action="index.html">
+                          <div id="response"></div>
+                          <div class="form-horizontal form-user-profile row mt-2">
                             <div class="col-6">
                               <fieldset class="form-label-group">
-                                <input type="text" class="form-control" id="user-name" value="johndoe9016" required="" autofocus="">
+                                <input type="text" class="form-control" id="username" value="<%= username %>" required="" autofocus="">
                                 <label for="user-name">Name</label>
                               </fieldset>
                             </div>
                             <div class="col-6">
                               <fieldset class="form-label-group">
-                                <input type="text" class="form-control" id="email-address" value="johndoe9016@gmail.com" required="" autofocus="">
+                                <input type="text" disabled class="form-control" id="email" value="<%= email %>" required="" autofocus="">
                                 <label for="email-address">Email</label>
                               </fieldset>
                             </div>
                             <div class="col-6">
                               <fieldset class="form-label-group">
                                 <input type="password" class="form-control" id="old-password" placeholder="Enter Password" required="" autofocus="">
-                                <label for="old-password">Old pass</label>
+                                <label for="old-password">Old pass (required)</label>
                               </fieldset>
                             </div>
                             <div class="col-6">
                               <fieldset class="form-label-group">
                                 <input type="password" class="form-control" id="new-password" placeholder="Enter Password" required="" autofocus="">
-                                <label for="new-password">New pass</label>
+                                <label for="new-password">New pass (leave blank to not change)</label>
+                              </fieldset>
+                            </div>
+                            <div class="col-6">
+                              <fieldset class="form-label-group">
+                                <input type="text" value="<%= wallet %>" class="form-control" disabled id="wallet">
+                                <label for="new-password">Your Wallet</label>
                               </fieldset>
                             </div>
                             <div class="col-12 text-right">
-                              <button type="submit" class="btn-gradient-primary my-1">Save</button>
+                              <button class="btn-gradient-primary my-1" id="update-profile-button">Save</button>
                             </div>
-                          </form>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -108,30 +111,18 @@
                         <i class="icon-layers font-large-3 bg-warning bg-glow white rounded-circle p-3 d-inline-block"></i>
                       </div>
                     </div>
-                    <h3 class="text-center">3,458.88 CIC</h3>
+                    <h3 class="text-center" id="token-balance">Loading.. </h3>
                   </div>
                   <div class="table-responsive">
                     <table class="table table-de mb-0">
                       <tbody>
                         <tr>
-                          <td>CIC Token</td>
-                          <td><i class="icon-layers"></i> 3,258 CIC</td>
+                          <td>SF Token Price - Each</td>
+                          <td><i class="la la-dollar"></i> 0.05</td>
                         </tr>
                         <tr>
-                          <td>CIC Referral</td>
-                          <td><i class="icon-layers"></i> 200.88 CIC</td>
-                        </tr>
-                        <tr>
-                          <td>CIC Price</td>
-                          <td><i class="cc BTC-alt"></i> 0.0001 BTC</td>
-                        </tr>
-                        <tr>
-                          <td>Raised BTC</td>
-                          <td><i class="cc BTC-alt"></i> 2154 BTC</td>
-                        </tr>
-                        <tr>
-                          <td>Raised USD</td>
-                          <td><i class="la la-dollar"></i> 4.52 M</td>
+                          <td>Your Wallet Value</td>
+                          <td id="wallet-value"><i class="la la-dollar"></i> Calculating.. </td>
                         </tr>
                       </tbody>
                     </table>
@@ -157,5 +148,23 @@
     <!-- BEGIN PAGE LEVEL JS-->
     <script src="app-assets/js/scripts/forms/account-profile.js" type="text/javascript"></script>
     <!-- END PAGE LEVEL JS-->
+    <script src="js/config.js" type="text/javascript"></script>
+    <script src="js/profile.js" type="text/javascript"></script>
+    <script type="text/javascript">
+      fetch(`${config.url}/api/balance/<%= wallet %>`)
+      .then((res) => {
+        res.json().then((response) => {
+          if (response.code == 200) {
+            document.getElementById("token-balance").innerHTML = `${response.balance} SF`;
+            document.getElementById("wallet-value").innerHTML = `<i class="la la-dollar"></i>${response.balance*0.05}`;
+          } else {
+            console.log(response.message)
+          }
+        });
+      })
+      .catch((err) => {
+        console.log(`Fetch Error :-S ${err}`);
+      });
+    </script>
   </body>
 </html>

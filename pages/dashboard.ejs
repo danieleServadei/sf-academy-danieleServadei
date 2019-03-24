@@ -46,7 +46,7 @@
                       <div class="row">
                         <div class="col-md-8 col-12">
                           <p><strong>Your balance:</strong></p>
-                          <h1 id="token-balance"><%= floor %></h1>
+                          <h1 id="token-balance">Loading.. </h1>
                           <p class="mb-0">Investors price: <strong>$0.01</strong>, expired.</p>
                         </div>
                       </div>
@@ -183,5 +183,21 @@
     <script src="app-assets/js/core/app-menu.js" type="text/javascript"></script>
     <script src="app-assets/js/core/app.js" type="text/javascript"></script>
     <!-- END MODERN JS-->
+    <script src="js/config.js" type="text/javascript"></script>
+    <script type="text/javascript">
+      fetch(`${config.url}/api/balance/<%= wallet %>`)
+      .then((res) => {
+        res.json().then((response) => {
+          if (response.code == 200) {
+            document.getElementById("token-balance").innerHTML = `${response.balance} SF`;
+          } else {
+            console.log(response.message)
+          }
+        });
+      })
+      .catch((err) => {
+        console.log(`Fetch Error :-S ${err}`);
+      });
+    </script>
   </body>
 </html>

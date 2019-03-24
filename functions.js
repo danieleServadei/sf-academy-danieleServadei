@@ -4,6 +4,12 @@ const logged = (req) => {
   });
 }
 
+const getTransactions = (userId, connection) => {
+  connection.query('SELECT * FROM transactions WHERE sender_id = ?', [userId], (error, results, fields) => {
+    return results;
+  });
+}
+
 const randomString = (length) => {
   let text = "";
   const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -16,5 +22,6 @@ const randomString = (length) => {
 
 module.exports = { 
   logged: logged,
-  randomString: randomString
+  randomString: randomString,
+  getTransactions: getTransactions
 }

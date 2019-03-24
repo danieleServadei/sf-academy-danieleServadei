@@ -18,7 +18,7 @@ const rounds = config.rounds;
 const bodyParser = require("body-parser")
 const session = require("express-session");
 // Functions
-const { logged, randomString } = require("./functions");
+const { logged, randomString, getTransactions } = require("./functions");
 const port = 80;
 // Solidity Smart Contract
 const contract = require(`${__dirname}/solidity/contract`);
@@ -40,6 +40,10 @@ connection.connect();
 // Load AWS credentials
 AWS.config.loadFromPath("./config.json");
 
+// EJS
+app.set('view engine', 'ejs');
+app.set('views', `${__dirname}/pages`);
+
 // Express Middleware
 app.use(bodyParser.urlencoded({
   extended: true
@@ -54,7 +58,7 @@ app.use(session({
 }))
 
 // Authentication needed middleware
-app.use(["/dashboard", "/buy-ico", "/wallet", "/transactions", "/faq", "/profile"], (req, res, next) => {
+/*app.use(["/dashboard", "/buy-ico", "/wallet", "/transactions", "/faq", "/profile"], (req, res, next) => {
   logged(req).then(() => {
     next();
   }).catch(() => {
@@ -69,7 +73,7 @@ app.use(["/login", "/register"], (req, res, next) => {
   }).catch(() => {
     next();
   })
-})
+})*/
 
 /*
 
@@ -82,12 +86,13 @@ app.use(["/login", "/register"], (req, res, next) => {
 */
 
 // testing purposes
-app.get("/autologin", (req, res) => {
+app.use("*", (req, res, next) => {
   req.session.userId = 1;
   req.session.email = "daniele@gmail.com";
   req.session.username = "daniele";
   req.session.wallet = "pVPxsSM2qilsizBrEIU2tWYwx8v3njIhsK";
-  res.redirect("/dashboard");
+  req.session.register_date = "03/24/2019";
+  next();
 });
 
 app.get("/users", (req, res) => {
@@ -105,11 +110,21 @@ app.get("/", (req, res) => {
 });
 
 app.get("/dashboard", (req, res) => {
-  res.sendFile("dashboard.html", dir);
+  const { userId, wallet } = req.session;
+  
+  res.render('dashboard.ejs', {
+    userId: userId,
+    wallet: wallet
+  });
 });
 
 app.get("/buy-ico", (req, res) => {
-  res.sendFile("buy-ico.html", dir);
+  const { userId, wallet } = req.session;
+
+  res.render('buy-ico.ejs', {
+    userId: userId,
+    wallet: wallet
+  });
 });
 
 app.get("/wallet", (req, res) => {
@@ -125,7 +140,24 @@ app.get("/faq", (req, res) => {
 });
 
 app.get("/profile", (req, res) => {
-  res.sendFile("profile.html", dir);
+  const { userId, email, username, register_date, wallet } = req.session;
+
+  // get transactions count
+  let transactions = getTransactions(userId, connection);
+  if (transactions) {
+    transactions = Object.keys(transactions).length;
+  } else {
+    transactions = 0;
+  }
+
+  res.render('profile.ejs', {
+    userId: userId,
+    email: email,
+    username: username,
+    register_date: register_date,
+    transactions_count: transactions,
+    wallet: wallet
+  });
 });
 
 app.get("/login", (req, res) => {
@@ -142,6 +174,7 @@ API
 /api/login # login
 /api/register # register, wallet creation etc.
 /api/balance/:wallet # get wallet balance
+/api/updateProfile # update profile, change username and password
 
 */
 
@@ -167,6 +200,7 @@ app.post("/api/login", (req, res) => {
           req.session.userId = results[0].id;
           req.session.email = results[0].email;
           req.session.username = results[0].username;
+          req.session.register_date = results[0].register_date;
           req.session.wallet = results[0].wallet;
           res.status(200).json({
             code: 200,
@@ -210,8 +244,11 @@ app.post("/api/register", (req, res) => {
       });
     } else {
       // Insert the user in the DB
+      let today = new Date();
+      date = today.toLocaleDateString("it-IT");
+
       bcrypt.hash(`${password}${salt}`, rounds, (err, hash) => {
-        connection.query('INSERT INTO users (username, email, password, wallet) VALUES (?, ?, ?, ?);', [username, email, hash, wallet], (error, results, fields) => {
+        connection.query('INSERT INTO users (username, email, password, wallet, register_date) VALUES (?, ?, ?, ?, ?);', [username, email, hash, wallet, date], (error, results, fields) => {
           if (error) throw error;
           contract.createWallet(wallet).then(() => {
             res.status(200).json({
@@ -223,6 +260,54 @@ app.post("/api/register", (req, res) => {
       });
     }
   });
+});
+
+app.post("/api/updateProfile", (req, res) => {
+  const { username, newPassword, oldPassword } = req.body;
+  const email = req.session.email;
+
+  if (!username) {
+    res.status(200).json({
+      code: 400,
+      message: "Invalid Username"
+    });
+    process.exit();
+  }
+
+  // check if the old password is correct
+  connection.query('SELECT * FROM users WHERE email = ?', [email], (error, results, fields) => {
+    if (results[0]) {
+      const hash = results[0].password;
+      bcrypt.compare(`${oldPassword}${salt}`, hash, (err, compared) => {
+        if (compared) {
+          let toHash = newPassword;
+          if (!newPassword) {
+            toHash = oldPassword;
+          }
+          bcrypt.hash(`${toHash}${salt}`, rounds, (err, hash) => {
+            connection.query('UPDATE users SET username = ?, password = ? WHERE email = ?;', [username, hash, email], (error, results, fields) => {
+              if (error) throw error;
+              res.status(200).json({
+                code: 200,
+                message: "Your profile has been updated successfully!"
+              });
+            });
+          });
+        } else {
+          res.status(200).json({
+            code: 400,
+            message: "Invalid Old Password"
+          });
+        }
+      });
+    } else {
+      res.status(200).json({
+        code: 400,
+        message: "Something went wrong.."
+      });
+    }
+  });
+
 });
 
 app.post("/api/transfer", (req, res) => {

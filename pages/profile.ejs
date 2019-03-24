@@ -151,7 +151,7 @@
     <script src="js/config.js" type="text/javascript"></script>
     <script src="js/profile.js" type="text/javascript"></script>
     <script type="text/javascript">
-      fetch(`${config.url}/api/balance/<%= wallet %>`)
+      fetch(`${config.url}/api/balance`)
       .then((res) => {
         res.json().then((response) => {
           if (response.code == 200) {

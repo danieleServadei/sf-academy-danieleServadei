@@ -18,7 +18,7 @@ const rounds = config.rounds;
 const bodyParser = require("body-parser")
 const session = require("express-session");
 // Functions
-const { logged, randomString, getTransactions } = require("./functions");
+const { logged, randomString, getTransactions, getUser } = require("./functions");
 const port = 80;
 // Solidity Smart Contract
 const contract = require(`${__dirname}/solidity/contract`);
@@ -58,7 +58,7 @@ app.use(session({
 }))
 
 // Authentication needed middleware
-/*app.use(["/dashboard", "/buy-ico", "/wallet", "/transactions", "/faq", "/profile"], (req, res, next) => {
+app.use(["/dashboard", "/buy-ico", "/wallet", "/transactions", "/faq", "/profile"], (req, res, next) => {
   logged(req).then(() => {
     next();
   }).catch(() => {
@@ -73,7 +73,7 @@ app.use(["/login", "/register"], (req, res, next) => {
   }).catch(() => {
     next();
   })
-})*/
+})
 
 /*
 
@@ -85,7 +85,10 @@ app.use(["/login", "/register"], (req, res, next) => {
 
 */
 
-// testing purposes
+/*
+
+testing purposes
+
 app.use("*", (req, res, next) => {
   req.session.userId = 1;
   req.session.email = "daniele@gmail.com";
@@ -94,6 +97,7 @@ app.use("*", (req, res, next) => {
   req.session.register_date = "03/24/2019";
   next();
 });
+*/
 
 app.get("/users", (req, res) => {
   connection.query('SELECT * FROM users', (error, results, fields) => {
@@ -106,29 +110,19 @@ app.get("/index", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.sendFile("index.html", dir);
+  res.render('index.ejs');
 });
 
 app.get("/dashboard", (req, res) => {
-  const { userId, wallet } = req.session;
-  
-  res.render('dashboard.ejs', {
-    userId: userId,
-    wallet: wallet
-  });
+  res.render('dashboard.ejs');
 });
 
 app.get("/buy-ico", (req, res) => {
-  const { userId, wallet } = req.session;
-
-  res.render('buy-ico.ejs', {
-    userId: userId,
-    wallet: wallet
-  });
+  res.render('buy-ico.ejs');
 });
 
 app.get("/wallet", (req, res) => {
-  res.sendFile("wallet.html", dir);
+  res.render('wallet.ejs');
 });
 
 app.get("/transactions", (req, res) => {
@@ -161,11 +155,11 @@ app.get("/profile", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  res.sendFile("login.html", dir);
+  res.render('login.ejs');
 });
 
 app.get("/register", (req, res) => {
-  res.sendFile("register.html", dir);
+  res.render('register.ejs');
 });
 
 /*
@@ -175,6 +169,10 @@ API
 /api/register # register, wallet creation etc.
 /api/balance/:wallet # get wallet balance
 /api/updateProfile # update profile, change username and password
+/api/addFounds # add tokens into wallet
+/api/deposit # deposit ETH
+/api/balance # get wallet balance
+/api/ethereum/balance # get ethereum balance
 
 */
 
@@ -307,7 +305,6 @@ app.post("/api/updateProfile", (req, res) => {
       });
     }
   });
-
 });
 
 app.post("/api/transfer", (req, res) => {
@@ -325,23 +322,55 @@ app.post("/api/transfer", (req, res) => {
   });
 });
 
-app.post("/api/addFounds", (req, res) => {
-  const { wallet, tokens } = req.body;
-  contract.addFounds(wallet, tokens).then(() => {
-    res.status(200).json({
-      code: 200,
-      message: "tokens added successfully"
+app.post("/api/deposit", (req, res) => {
+  let { amount } = req.body;
+  const { userId } = req.session;
+  amount = parseFloat(amount);
+
+  getUser(userId).then((user) => {
+    let newEthBalance = user.eth_balance + amount;
+    connection.query('UPDATE users SET eth_balance = ? WHERE id = ?;', [newEthBalance, userId], (error, results, fields) => {
+      if (error) throw error;
+      res.status(200).json({
+        code: 200,
+        message: `Deposit completed. You have now ${newEthBalance} ETH in your wallet.`
+      });
     });
-  }).catch((e) => {
-    res.status(200).json({
-      code: 400,
-      error: e
-    })
   });
 });
 
-app.get("/api/balance/:wallet", (req, res) => {
-  const wallet = req.params.wallet;
+app.post("/api/addFounds", (req, res) => {
+  const { tokens } = req.body;
+  const { wallet, userId } = req.session;
+  const ETHprice = tokens*0.00042;
+  getUser(userId).then((user) => {
+    if (user.eth_balance < ETHprice) {
+      res.status(200).json({
+        code: 400,
+        error: "You do not have enough ETH in your wallet, please deposit more ETH in order to complete this transaction."
+      });
+    } else {
+      contract.addFounds(wallet, tokens).then(() => {
+        let newEthBalance = user.eth_balance - ETHprice;
+        connection.query('UPDATE users SET eth_balance = ? WHERE id = ?;', [newEthBalance, userId], (error, results, fields) => {
+          if (error) throw error;
+          res.status(200).json({
+            code: 200,
+            message: "Transaction completed successfully, you may need to wait a few minutes in order to see your balance updated."
+          });
+        });
+      }).catch((e) => {
+        res.status(200).json({
+          code: 400,
+          error: e
+        })
+      });
+    }
+  });
+});
+
+app.get("/api/balance", (req, res) => {
+  const { wallet } = req.session;
   contract.getWalletBalance(wallet).then((balance) => {
     res.status(200).json({
       code: 200,
@@ -355,9 +384,19 @@ app.get("/api/balance/:wallet", (req, res) => {
   });
 });
 
+app.get("/api/ethereum/balance", (req, res) => {
+  const { userId } = req.session;
+  connection.query('SELECT * FROM users WHERE id = ?', [userId], (error, results, fields) => {
+    res.status(200).json({
+      code: 200,
+      balance: results[0].eth_balance
+    })
+  });
+});
+
 // catch 404 error
 app.get("*", (req, res) => {
-  res.sendFile("404.html", dir);
+  res.render('404.ejs');
 });
 
 // listen

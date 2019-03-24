@@ -47,7 +47,7 @@
                         <div class="col-md-8 col-12">
                           <p><strong>Your balance:</strong></p>
                           <h1 id="token-balance">Loading.. </h1>
-                          <p class="mb-0">Investors price: <strong>$0.01</strong>, expired.</p>
+                          <p class="mb-0">SF ICO base price: <strong>$0.05</strong>.</p>
                         </div>
                       </div>
                     </div>
@@ -185,7 +185,7 @@
     <!-- END MODERN JS-->
     <script src="js/config.js" type="text/javascript"></script>
     <script type="text/javascript">
-      fetch(`${config.url}/api/balance/<%= wallet %>`)
+      fetch(`${config.url}/api/balance`)
       .then((res) => {
         res.json().then((response) => {
           if (response.code == 200) {

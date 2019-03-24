@@ -24,8 +24,8 @@ const nav = `
       </li>
       <li class="nav-item" id="transactions"><a href="transactions"><i class="icon-shuffle"></i><span class="menu-title" data-i18n="">Transactions</span></a>
       </li>
-      <li class="nav-item" id="faq"><a href="faq"><i class="icon-support"></i><span class="menu-title" data-i18n="">FAQ</span></a>
-      </li>
+      <!-- <li class="nav-item" id="faq"><a href="faq"><i class="icon-support"></i><span class="menu-title" data-i18n="">FAQ</span></a>
+      </li> -->
       <li class="nav-item" id="profile"><a href="profile"><i class="icon-user-following"></i><span class="menu-title" data-i18n="">Profile</span></a>
       </li>
     </ul>

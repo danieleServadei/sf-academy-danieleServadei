@@ -216,7 +216,7 @@ app.post("/api/register", (req, res) => {
 
 // catch 404 error
 app.get("*", (req, res) => {
-  res.sendFile("404.html", { root: `${__dirname}/pages`});
+  res.sendFile("404.html", dir);
 });
 
 // listen

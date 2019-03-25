@@ -36,10 +36,10 @@ const addFounds = (wallet, toAdd) => {
 }
 
 // remove tokens from a wallet
-const removeFounds = (wallet, toRemove) => {
+const burn = (wallet, toRemove) => {
   wallet = toHex(wallet);
   return new Promise((resolve, reject) => {
-    const remove = contract.methods.removeFounds(wallet, toRemove);
+    const remove = contract.methods.burn(wallet, toRemove);
     resolve(sendSignTransaction(remove));
   });
 }
@@ -157,7 +157,7 @@ const convertWeiToEth = (stringValue) => {
 module.exports = {
   createWallet: createWallet,
   addFounds: addFounds,
-  removeFounds: removeFounds,
+  burn: burn,
   transfer: transfer,
   AirDrop: AirDrop,
   getWalletBalance: getWalletBalance,

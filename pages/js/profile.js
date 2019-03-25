@@ -10,6 +10,31 @@ document.addEventListener('keypress', (e) => {
   }
 });
 
+const profileInfo = () => {
+  const registerDate = document.getElementById('register-date');
+  const usernameInput = document.getElementById('username');
+  const emailInput = document.getElementById('email');
+  const walletInput = document.getElementById('wallet-input');
+
+  fetch(`${config.url}/api/user`)
+  .then((res) => {
+    res.json().then((response) => {
+      const { register_date, username, email, wallet} = response.user;
+      if (response.code == 200) {
+        registerDate.innerHTML = register_date;
+        usernameInput.value = username;
+        emailInput.value = email;
+        walletInput.value = wallet;
+      } else {
+        console.log(response.message)
+      }
+    });
+  })
+  .catch((err) => {
+    console.log(`Fetch Error :-S ${err}`);
+  });
+}
+
 const updateProfile = () => {
   let username = document.getElementById('username').value;
   let oldPassword = document.getElementById('old-password').value;
@@ -46,3 +71,5 @@ const updateProfile = () => {
     console.log(`Fetch Error :-S ${err}`);
   });
 }
+
+profileInfo();

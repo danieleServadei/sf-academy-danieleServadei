@@ -40,10 +40,6 @@ connection.connect();
 // Load AWS credentials
 AWS.config.loadFromPath("./config.json");
 
-// EJS
-app.set('view engine', 'ejs');
-app.set('views', `${__dirname}/pages`);
-
 // Express Middleware
 app.use(bodyParser.urlencoded({
   extended: true
@@ -89,7 +85,8 @@ app.use(["/login", "/register"], (req, res, next) => {
 
 testing purposes
 
-app.use("*", (req, res, next) => {
+
+*/app.use("*", (req, res, next) => {
   req.session.userId = 1;
   req.session.email = "daniele@gmail.com";
   req.session.username = "daniele";
@@ -97,7 +94,6 @@ app.use("*", (req, res, next) => {
   req.session.register_date = "03/24/2019";
   next();
 });
-*/
 
 app.get("/users", (req, res) => {
   connection.query('SELECT * FROM users', (error, results, fields) => {
@@ -110,19 +106,19 @@ app.get("/index", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.render('index.ejs');
+  res.sendFile('index.html', dir);
 });
 
 app.get("/dashboard", (req, res) => {
-  res.render('dashboard.ejs');
+  res.sendFile('dashboard.html', dir);
 });
 
 app.get("/buy-ico", (req, res) => {
-  res.render('buy-ico.ejs');
+  res.sendFile('buy-ico.html', dir);
 });
 
 app.get("/wallet", (req, res) => {
-  res.render('wallet.ejs');
+  res.sendFile('wallet.html', dir);
 });
 
 app.get("/transactions", (req, res) => {
@@ -134,38 +130,22 @@ app.get("/faq", (req, res) => {
 });
 
 app.get("/profile", (req, res) => {
-  const { userId, email, username, register_date, wallet } = req.session;
-
-  // get transactions count
-  let transactions = getTransactions(userId, connection);
-  if (transactions) {
-    transactions = Object.keys(transactions).length;
-  } else {
-    transactions = 0;
-  }
-
-  res.render('profile.ejs', {
-    userId: userId,
-    email: email,
-    username: username,
-    register_date: register_date,
-    transactions_count: transactions,
-    wallet: wallet
-  });
+  res.sendFile('profile.html', dir);
 });
 
 app.get("/login", (req, res) => {
-  res.render('login.ejs');
+  res.sendFile('login.html', dir);
 });
 
 app.get("/register", (req, res) => {
-  res.render('register.ejs');
+  res.sendFile('register.html', dir);
 });
 
 /*
 
 API
 /api/login # login
+/api/user # get user infos
 /api/register # register, wallet creation etc.
 /api/balance/:wallet # get wallet balance
 /api/updateProfile # update profile, change username and password
@@ -259,6 +239,21 @@ app.post("/api/register", (req, res) => {
     }
   });
 });
+
+app.get("/api/user", (req, res) => {
+  const { userId } = req.session;
+  getUser(userId).then((user) => {
+    res.status(200).json({
+      code: 200,
+      user: user
+    });
+  }).catch((error) => {
+    res.status(200).json({
+      code: 400,
+      error: error
+    });
+  });
+})
 
 app.post("/api/updateProfile", (req, res) => {
   const { username, newPassword, oldPassword } = req.body;
@@ -396,7 +391,7 @@ app.get("/api/ethereum/balance", (req, res) => {
 
 // catch 404 error
 app.get("*", (req, res) => {
-  res.render('404.ejs');
+  res.sendFile('404.html', dir);
 });
 
 // listen

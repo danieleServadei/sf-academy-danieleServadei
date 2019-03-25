@@ -42,14 +42,6 @@ contract ICO {
   // users balance, the key will be their address
   mapping (bytes => uint256) balance;
   
-  // ICO tokens available till open
-  uint256 public tokensAvailable;
-  
-  // constructor, set the max tokens available
-  constructor(uint256 quantity) public {
-    tokensAvailable = quantity;
-  }
-  
   // create a wallet
   function createWallet(bytes memory wallet) public returns (uint256) {
     balance[wallet] = 0;
@@ -62,20 +54,17 @@ contract ICO {
 
   // add founds to a wallet
   function addFounds(bytes memory wallet, uint256 toAdd) public {
-    require(tokensAvailable > toAdd);
-    tokensAvailable = SafeMath.sub(tokensAvailable, toAdd);
     balance[wallet] = SafeMath.add(balance[wallet], toAdd);
   }
 
   // transfer tokens between two wallets
   function transfer(bytes memory walletBuyer, bytes memory walletSeller, uint256 price) public {
-    require(balance[walletBuyer] > price);
     balance[walletBuyer] = SafeMath.sub(balance[walletBuyer], price);
     balance[walletSeller] = SafeMath.add(balance[walletSeller], price);
   }
 
   // remove founds from a wallet (AKA burn - single wallet)
-  function removeFounds(bytes memory wallet, uint256 toRemove) public {
+  function burn(bytes memory wallet, uint256 toRemove) public {
     balance[wallet] = SafeMath.sub(balance[wallet], toRemove);
   }
 

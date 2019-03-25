@@ -41,15 +41,14 @@
       {
         "name": "wallet",
         "type": "bytes"
-      }
-    ],
-    "name": "createWallet",
-    "outputs": [
+      },
       {
-        "name": "",
+        "name": "toRemove",
         "type": "uint256"
       }
     ],
+    "name": "burn",
+    "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
@@ -60,13 +59,23 @@
       {
         "name": "wallet",
         "type": "bytes"
-      },
+      }
+    ],
+    "name": "createWallet",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
       {
-        "name": "toRemove",
+        "name": "toSet",
         "type": "uint256"
       }
     ],
-    "name": "removeFounds",
+    "name": "set",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",

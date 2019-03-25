@@ -184,20 +184,6 @@
     <script src="app-assets/js/core/app.js" type="text/javascript"></script>
     <!-- END MODERN JS-->
     <script src="js/config.js" type="text/javascript"></script>
-    <script type="text/javascript">
-      fetch(`${config.url}/api/balance`)
-      .then((res) => {
-        res.json().then((response) => {
-          if (response.code == 200) {
-            document.getElementById("token-balance").innerHTML = `${response.balance} SF`;
-          } else {
-            console.log(response.message)
-          }
-        });
-      })
-      .catch((err) => {
-        console.log(`Fetch Error :-S ${err}`);
-      });
-    </script>
+    <script src="js/wallet-loader.js" type="text/javascript"></script>
   </body>
 </html>

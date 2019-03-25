@@ -22,7 +22,7 @@ const nav = `
       </li>
       <li class="nav-item" id="wallet"><a href="wallet"><i class="icon-wallet"></i><span class="menu-title" data-i18n="">Wallet</span></a>
       </li>
-      <li class="nav-item" id="transactions"><a href="transactions"><i class="icon-shuffle"></i><span class="menu-title" data-i18n="">Transactions</span></a>
+      <li class="nav-item" id="shop"><a href="shop"><i class="icon-shuffle"></i><span class="menu-title" data-i18n="">Shop</span></a>
       </li>
       <!-- <li class="nav-item" id="faq"><a href="faq"><i class="icon-support"></i><span class="menu-title" data-i18n="">FAQ</span></a>
       </li> -->

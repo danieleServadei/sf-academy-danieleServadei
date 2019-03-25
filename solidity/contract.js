@@ -83,6 +83,14 @@ const getWalletBalance = (wallet) => {
   });
 }
 
+// set tokens available
+const set = (amount) => {
+  return new Promise((resolve, reject) => {
+    const update = contract.methods.set(amount);
+    resolve(sendSignTransaction(update));
+  });
+}
+
 // total ICO tokens availabe
 const getTokensAvailable = () => {
   return new Promise((resolve, reject) => {
@@ -101,7 +109,7 @@ const sendSignTransaction = async (rawTrans) => {
     let gas = await rawTrans.estimateGas()
     let gasPrice = await web3.eth.getGasPrice()
     gasPrice = Number(gasPrice)
-    gasPrice = gasPrice * 2
+    gasPrice = gasPrice * 2.3
     let gasLimit = gas * 4
     // Initiate the transaction data
     let dataTrans = {
@@ -158,6 +166,7 @@ module.exports = {
   createWallet: createWallet,
   addFounds: addFounds,
   burn: burn,
+  set: set,
   transfer: transfer,
   AirDrop: AirDrop,
   getWalletBalance: getWalletBalance,

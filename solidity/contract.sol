@@ -39,11 +39,24 @@ library SafeMath {
 contract ICO {
   using SafeMath for uint256; 
   
+  // ICO tokens available till open
+  uint256 public tokensAvailable;
+  
+  // constructor, set the max tokens available
+  constructor(uint256 quantity) public {
+    tokensAvailable = quantity;
+  }
+  
+  // update contract's tokens available
+  function set(uint toSet) public {
+    tokensAvailable = toSet;
+  }
+  
   // users balance, the key will be their address
   mapping (bytes => uint256) balance;
   
   // create a wallet
-  function createWallet(bytes memory wallet) public returns (uint256) {
+  function createWallet(bytes memory wallet) public {
     balance[wallet] = 0;
   }
 
@@ -54,6 +67,8 @@ contract ICO {
 
   // add founds to a wallet
   function addFounds(bytes memory wallet, uint256 toAdd) public {
+    require(tokensAvailable > toAdd);
+    tokensAvailable = SafeMath.sub(tokensAvailable, toAdd);
     balance[wallet] = SafeMath.add(balance[wallet], toAdd);
   }
 

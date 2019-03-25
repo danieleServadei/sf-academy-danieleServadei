@@ -66,8 +66,8 @@
                           </div>
                         </div>
                         <div class="col-md-2 col-12 py-1 text-center">
-                          <h6 id="wallet-value-eth"> Loading.. </h6>
-                          <p class="text-muted mb-0 font-small-3" id="wallet-value"> Loading.. </p>
+                          <h6 id="eth-value"> Loading.. </h6>
+                          <p class="text-muted mb-0 font-small-3" id="eth-value-usd"> Loading.. </p>
                         </div>
                         <div class="col-md-2 col-12 py-1 text-center">
                           <a href="buy-ico" class="line-height-3">Deposit</a>
@@ -100,6 +100,20 @@
                   </div>
                   <h3 class="text-center" id="token-balance">Loading.. </h3>
                 </div>
+                <div class="table-responsive">
+                    <table class="table table-de mb-0">
+                      <tbody>
+                        <tr>
+                          <td>Token Price</td>
+                          <td><i class="la la-dollar"></i> 0.05</td>
+                        </tr>
+                        <tr>
+                          <td>Wallet Value</td>
+                          <td id="wallet-value"><i class="la la-dollar"></i> Calculating.. </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
               </div>
             </div>
           </div>
@@ -120,27 +134,14 @@
     <!-- BEGIN PAGE LEVEL JS-->
     <!-- END PAGE LEVEL JS-->
     <script src="js/config.js" type="text/javascript"></script>
+    <script src="js/wallet-loader.js" type="text/javascript"></script>
     <script type="text/javascript">
-      fetch(`${config.url}/api/balance`)
-      .then((res) => {
-        res.json().then((response) => {
-          if (response.code == 200) {
-            document.getElementById("token-balance").innerHTML = `${response.balance} SF`;
-          } else {
-            console.log(response.message)
-          }
-        });
-      })
-      .catch((err) => {
-        console.log(`Fetch Error :-S ${err}`);
-      });
-
       fetch(`${config.url}/api/ethereum/balance`)
       .then((res) => {
         res.json().then((response) => {
           if (response.code == 200) {
-            document.getElementById("wallet-value").innerHTML = `${(response.balance*config.ETHInUSD).toFixed(2)} USD`;
-            document.getElementById("wallet-value-eth").innerHTML = `${response.balance.toFixed(4)} ETH`;
+            document.getElementById("eth-value-usd").innerHTML = `${(response.balance*config.ETHInUSD).toFixed(2)} USD`;
+            document.getElementById("eth-value").innerHTML = `${response.balance.toFixed(4)} ETH`;
           } else {
             console.log(response.message)
           }

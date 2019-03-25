@@ -165,7 +165,7 @@
             </div>
             <!--/ Purchase with ETH Modal -->
             <h6 class="mt-4">Deposit ETH</h6>
-            <p>You can also deposit ETH and buy tokens in our <a href="transactions">transactions shop</a></p>
+            <p>You can also deposit ETH and buy tokens in our <a href="shop">transactions shop</a></p>
             <!-- Ethereum -->
             <section class="card pull-up">
               <div class="card-content">
@@ -245,7 +245,7 @@
                     <ol>
                       <li>Deposit how many ETH you want.</li>
                       <li>Your balance will be available instantly.</li>
-                      <li>Visit the <a href="transactions">Transactions Shop</a> in order to buy tokens.</li>
+                      <li>Visit the <a href="shop">Transactions Shop</a> in order to buy tokens.</li>
                     </ol>
                   </div>
                 </div>
@@ -360,21 +360,7 @@
     <!-- END PAGE LEVEL JS-->
     <script src="js/config.js" type="text/javascript"></script>
     <script src="js/buy-ico.js" type="text/javascript"></script>
-    <script type="text/javascript">
-      fetch(`${config.url}/api/balance`)
-      .then((res) => {
-        res.json().then((response) => {
-          if (response.code == 200) {
-            document.getElementById("token-balance").innerHTML = `${response.balance} SF`;
-          } else {
-            console.log(response.message)
-          }
-        });
-      })
-      .catch((err) => {
-        console.log(`Fetch Error :-S ${err}`);
-      });
-    </script>
+    <script src="js/wallet-loader.js" type="text/javascript"></script>
     <script>
       purchaseButton.onclick = () => {
         let value = sfInput.value;

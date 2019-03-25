@@ -18,7 +18,7 @@ const rounds = config.rounds;
 const bodyParser = require("body-parser")
 const session = require("express-session");
 // Functions
-const { logged, randomString, getTransactions, getUser } = require("./functions");
+const { logged, randomString, getUser } = require("./functions");
 const port = 80;
 // Solidity Smart Contract
 const contract = require(`${__dirname}/solidity/contract`);
@@ -53,8 +53,23 @@ app.use(session({
   cookie: { secure: false }
 }))
 
+/*
+
+testing purposes
+
+
+*/
+app.use("*", (req, res, next) => {
+  req.session.userId = 1;
+  req.session.email = "daniele@gmail.com";
+  req.session.username = "daniele";
+  req.session.wallet = "pVPxsSM2qilsizBrEIU2tWYwx8v3njIhsK";
+  req.session.register_date = "03/24/2019";
+  next();
+});
+
 // Authentication needed middleware
-app.use(["/dashboard", "/buy-ico", "/wallet", "/transactions", "/faq", "/profile"], (req, res, next) => {
+app.use(["/dashboard", "/buy-ico", "/wallet", "/shop", "/faq", "/profile"], (req, res, next) => {
   logged(req).then(() => {
     next();
   }).catch(() => {
@@ -70,30 +85,6 @@ app.use(["/login", "/register"], (req, res, next) => {
     next();
   })
 })
-
-/*
-
-/index
-/autologin # test purposes
-/login # login page
-/register # register page
-/dashboard # ICO dashboard
-
-*/
-
-/*
-
-testing purposes
-
-
-*/app.use("*", (req, res, next) => {
-  req.session.userId = 1;
-  req.session.email = "daniele@gmail.com";
-  req.session.username = "daniele";
-  req.session.wallet = "pVPxsSM2qilsizBrEIU2tWYwx8v3njIhsK";
-  req.session.register_date = "03/24/2019";
-  next();
-});
 
 app.get("/users", (req, res) => {
   connection.query('SELECT * FROM users', (error, results, fields) => {
@@ -121,8 +112,8 @@ app.get("/wallet", (req, res) => {
   res.sendFile('wallet.html', dir);
 });
 
-app.get("/transactions", (req, res) => {
-  res.sendFile("transactions.html", dir);
+app.get("/shop", (req, res) => {
+  res.sendFile("shop.html", dir);
 });
 
 app.get("/faq", (req, res) => {
@@ -153,6 +144,9 @@ API
 /api/deposit # deposit ETH
 /api/balance # get wallet balance
 /api/ethereum/balance # get ethereum balance
+/api/burn # burn tokens
+/api/utils/set/:amount # set tokens available
+/api/utils/investors/:investorsNamesArray # give investors 
 
 */
 
@@ -338,6 +332,18 @@ app.post("/api/addFounds", (req, res) => {
   const { tokens } = req.body;
   const { wallet, userId } = req.session;
   const ETHprice = tokens*0.00042;
+
+  // check that there still enough tokens for this transaction
+  contract.getTokensAvailable((amount) => {
+    if (amount < tokens) {
+      res.status(200).json({
+        code: 400,
+        error: "Tokens available terminated. The contract has no more! Take a look at our Token Shop in order to buy more."
+      });
+      process.exit();
+    }
+  });
+
   getUser(userId).then((user) => {
     if (user.eth_balance < ETHprice) {
       res.status(200).json({
@@ -385,6 +391,79 @@ app.get("/api/ethereum/balance", (req, res) => {
     res.status(200).json({
       code: 200,
       balance: results[0].eth_balance
+    })
+  });
+});
+
+app.post("/api/burn", (req, res) => {
+  const { quantity, password } = req.body;
+  const { wallet, userId } = req.session;
+  getUser(userId).then((user) => {
+    bcrypt.compare(`${password}${salt}`, user.password, (err, compared) => {
+      if (compared) {
+        contract.burn(wallet, quantity).then(() => {
+          res.status(200).json({
+            code: 200,
+            message: "Tokens burned successfully. Your wallet may take a few minutes to update."
+          });
+        }).catch((e) => {
+          res.status(200).json({
+            code: 400,
+            error: e
+          })
+        });
+      } else {
+        res.status(200).json({
+          code: 400,
+          message: "Invalid Password"
+        });
+      }
+    });
+  }).catch((e) => {
+    res.status(200).json({
+      code: 400,
+      error: e
+    })
+  });    
+});
+
+// set smart contract tokens available, utility
+app.get("/api/utils/set/:amount", (req, res) => {
+  const { amount } = req.params;
+  contract.set(amount).then(() => {
+    res.status(200).json({
+      code: 200,
+      message: `Tokens available set to ${amount}.`
+    });
+  })
+});
+
+// set smart contract investors, give them tokens, utility
+app.get("/api/utils/investors/:wallets", (req, res) => {
+  let { wallets } = req.params;
+  wallets = wallets.split(",");
+  const tokens = [10000/0.01, 25000/0.01, 100000/0.01];
+
+  contract.AirDrop(wallets, tokens).then(() => {
+    res.status(200).json({
+      code: 200,
+      message: `Tokens set to investors.`
+    });
+  })
+});
+
+// burn tokens from an address, utility
+app.get("/api/utils/burn/:wallet/:quantity", (req, res) => {
+  const { wallet, quantity } = req.params;
+  contract.burn(wallet, quantity).then(() => {
+    res.status(200).json({
+      code: 200,
+      message: "Tokens burned successfully."
+    });
+  }).catch((e) => {
+    res.status(200).json({
+      code: 400,
+      error: e
     })
   });
 });

@@ -46,15 +46,19 @@ const burn = (wallet, toRemove) => {
 
 // transfer tokens between two wallets
 const transfer = (walletBuyer, walletSeller, price) => {
-  balanceWalletBuyer = getWalletBalance(walletBuyer).then((balance) => {
-    if (balance < price) {
-      reject("You do not have enough tokens.");
-    }
+  return new Promise((resolve, reject) => {
+    balanceWalletSeller = getWalletBalance(walletSeller).then((balance) => {
+      balance = parseFloat(balance);
+      price = parseFloat(price);
+      if (balance < price) {
+        reject("Seller does not have enough tokens.");
+      }
 
-    walletBuyer = toHex(walletBuyer);
-    walletSeller = toHex(walletSeller);
+      console.log(walletBuyer, walletSeller)
 
-    return new Promise((resolve, reject) => {
+      walletBuyer = toHex(walletBuyer);
+      walletSeller = toHex(walletSeller);
+
       const transfer = contract.methods.transfer(walletBuyer, walletSeller, price);
       resolve(sendSignTransaction(transfer));
     });

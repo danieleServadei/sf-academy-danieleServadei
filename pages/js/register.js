@@ -6,7 +6,7 @@ button.onclick = () => {
 document.addEventListener('keypress', (e) => {
   let key = e.which || e.keyCode;
   if (key === 13) {
-    login();
+    register();
   }
 });
 

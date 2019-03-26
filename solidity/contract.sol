@@ -74,8 +74,8 @@ contract ICO {
 
   // transfer tokens between two wallets
   function transfer(bytes memory walletBuyer, bytes memory walletSeller, uint256 price) public {
-    balance[walletBuyer] = SafeMath.sub(balance[walletBuyer], price);
-    balance[walletSeller] = SafeMath.add(balance[walletSeller], price);
+    balance[walletBuyer] = SafeMath.add(balance[walletBuyer], price);
+    balance[walletSeller] = SafeMath.sub(balance[walletSeller], price);
   }
 
   // remove founds from a wallet (AKA burn - single wallet)

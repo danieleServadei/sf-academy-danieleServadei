@@ -18,7 +18,7 @@ const rounds = config.rounds;
 const bodyParser = require("body-parser")
 const session = require("express-session");
 // Functions
-const { logged, randomString, getUser } = require("./functions");
+const { logged, randomString, getUser, getShopOrdersValue, getOrder, getTransactions } = require("./functions");
 const port = 80;
 // Solidity Smart Contract
 const contract = require(`${__dirname}/solidity/contract`);
@@ -58,6 +58,7 @@ app.use(session({
 testing purposes
 
 
+
 */
 app.use("*", (req, res, next) => {
   req.session.userId = 1;
@@ -67,7 +68,6 @@ app.use("*", (req, res, next) => {
   req.session.register_date = "03/24/2019";
   next();
 });
-
 // Authentication needed middleware
 app.use(["/dashboard", "/buy-ico", "/wallet", "/shop", "/faq", "/profile"], (req, res, next) => {
   logged(req).then(() => {
@@ -173,6 +173,7 @@ app.post("/api/login", (req, res) => {
           req.session.email = results[0].email;
           req.session.username = results[0].username;
           req.session.register_date = results[0].register_date;
+          req.session.eth_balance = results[0].eth_balance;
           req.session.wallet = results[0].wallet;
           res.status(200).json({
             code: 200,
@@ -237,6 +238,7 @@ app.post("/api/register", (req, res) => {
 app.get("/api/user", (req, res) => {
   const { userId } = req.session;
   getUser(userId).then((user) => {
+    req.session.eth_balance = user.eth_balance;
     res.status(200).json({
       code: 200,
       user: user
@@ -245,6 +247,16 @@ app.get("/api/user", (req, res) => {
     res.status(200).json({
       code: 400,
       error: error
+    });
+  });
+})
+
+app.get("/api/user/transactions", (req, res) => {
+  const { userId } = req.session;
+  getTransactions(userId).then((result) => {
+    res.status(200).json({
+      code: 200,
+      transactions: result
     });
   });
 })
@@ -296,21 +308,6 @@ app.post("/api/updateProfile", (req, res) => {
   });
 });
 
-app.post("/api/transfer", (req, res) => {
-  const { walletBuyer, walletSeller, price } = req.body;
-  contract.transfer(walletBuyer, walletSeller, price).then(() => {
-    res.status(200).json({
-      code: 200,
-      message: "tokens transferred successfully"
-    });
-  }).catch((e) => {
-    res.status(200).json({
-      code: 400,
-      error: e
-    })
-  });
-});
-
 app.post("/api/deposit", (req, res) => {
   let { amount } = req.body;
   const { userId } = req.session;
@@ -318,6 +315,7 @@ app.post("/api/deposit", (req, res) => {
 
   getUser(userId).then((user) => {
     let newEthBalance = user.eth_balance + amount;
+    req.session.eth_balance = newEthBalance;
     connection.query('UPDATE users SET eth_balance = ? WHERE id = ?;', [newEthBalance, userId], (error, results, fields) => {
       if (error) throw error;
       res.status(200).json({
@@ -353,6 +351,7 @@ app.post("/api/addFounds", (req, res) => {
     } else {
       contract.addFounds(wallet, tokens).then(() => {
         let newEthBalance = user.eth_balance - ETHprice;
+        req.session.eth_balance = newEthBalance;
         connection.query('UPDATE users SET eth_balance = ? WHERE id = ?;', [newEthBalance, userId], (error, results, fields) => {
           if (error) throw error;
           res.status(200).json({
@@ -367,6 +366,104 @@ app.post("/api/addFounds", (req, res) => {
         })
       });
     }
+  });
+});
+
+app.post("/api/order", (req, res) => {
+  const { amount, price } = req.body;
+  const { userId, username, wallet } = req.session;
+
+  const today = new Date();
+  const date = today.toLocaleDateString("it-IT");
+
+  if (!amount || !price || price <= 0 || amount <= 0) {
+    res.status(200).json({
+      code: 400,
+      message: "Please fill both amount and price."
+    })
+  } else {
+    getShopOrdersValue(userId).then((trValue) => {
+      trValue += parseFloat(amount);
+      contract.getWalletBalance(wallet).then((balance) => {
+        if (balance < trValue) {
+          res.status(200).json({
+            code: 400,
+            message: "You do not have enough Tokens!"
+          })
+        } else {
+          connection.query('INSERT INTO shop (userId, username, price, tokens, date) VALUES (?, ?, ?, ?, ?);', [userId, username, price, amount, date], (error, results, fields) => {
+            if (error) throw error;
+            res.status(200).json({
+              code: 200,
+              message: "Order created!"
+            })
+          });
+        }
+      });
+    });
+  }
+});
+
+app.post("/api/transfer", (req, res) => {
+  const { orderId, amount, price } = req.body;
+  const { wallet, eth_balance, userId } = req.session;
+  const eth_price = price*config.USDinETH;
+  if (eth_balance < eth_price) {
+    res.status(200).json({
+      code: 400,
+      message: "You do not have enough ETH deposited in your wallet to complete the transaction."
+    })
+  } else {
+    getOrder(orderId).then((order) => {
+      if (order.status == "available") {
+        getUser(order.userId).then((seller) => {
+          if (seller.id != userId) {
+            contract.transfer(wallet, seller.wallet, amount).then(() => {
+
+              new_eth_balance = eth_balance - eth_price;
+              req.session.eth_balance = new_eth_balance;
+              connection.query('UPDATE users SET eth_balance = ? WHERE id = ?', [new_eth_balance, userId]);
+              connection.query('UPDATE shop SET status = "purchased", buyerId = ? WHERE id = ?', [userId, orderId]);
+
+              seller_new_eth_balance = seller.eth_balance + eth_price;
+              connection.query('UPDATE users SET eth_balance = ? WHERE id = ?', [seller_new_eth_balance, seller.id], (error, results, fields) => {
+                res.status(200).json({
+                  code: 200,
+                  message: "Order purchased successfully. Your balance may take a few minutes to update."
+                });
+              });
+
+            }).catch((e) => {
+              res.status(200).json({
+                code: 400,
+                message: e
+              })
+            });
+          } else {
+            res.status(200).json({
+              code: 400,
+              message: "You can't buy your own order, lmao."
+            })
+          }
+        }).catch((e) => {
+          console.log(e);
+        });
+      } else {
+        res.status(200).json({
+          code: 400,
+          message: "This order has already been purchased!"
+        })
+      }
+    });
+  }
+});
+
+app.get("/api/shop", (req, res) => {
+  connection.query('SELECT * FROM shop ORDER BY id+0 DESC', (error, results, fields) => {
+    res.status(200).json({
+      code: 200,
+      shop: results
+    })
   });
 });
 

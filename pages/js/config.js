@@ -4,5 +4,6 @@ const config = {
   "ETHinSf": 2400,
   "sfInETH": 0.00042,
   "sfInUSD": 0.05,
-  "sfInBTC": 0.000014
+  "sfInBTC": 0.000014,
+  "USDinETH": 0.0075
 }

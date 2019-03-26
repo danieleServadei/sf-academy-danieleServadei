@@ -15,15 +15,43 @@ const logged = (req) => {
   });
 }
 
+const getShopOrdersValue = (userId) => {
+  return new Promise((resolve, reject) => {
+    connection.query('SELECT * FROM shop WHERE userId = ?', [userId], (error, results, fields) => {
+      let value = 0;
+      let r = 0;
+      for (r in results) {
+        value += results[r].tokens;
+      }
+      resolve(value);
+    });
+  });
+}
+
 const getTransactions = (userId) => {
-  connection.query('SELECT * FROM transactions WHERE sender_id = ?', [userId], (error, results, fields) => {
-    return results;
+  return new Promise((resolve, reject) => {
+    connection.query('SELECT * FROM shop WHERE id = ? AND status != "available" ORDER BY id DESC', [userId], (error, resultsShop, fields) => {
+      connection.query('SELECT * FROM shop WHERE buyerId = ? ORDER BY id DESC', [userId], (error, resultsBuyer, fields) => {
+        let result = {};
+        for(let key in resultsShop) result[key] = resultsShop[key];
+        for(let key in resultsBuyer) result[key] = resultsBuyer[key];
+        resolve(result);
+      });
+    });
   });
 }
 
 const getUser = (userId) => {
   return new Promise((resolve, reject) => {
     connection.query('SELECT * FROM users WHERE id = ?', [userId], (error, results, fields) => {
+      resolve(results[0]);
+    });
+  });
+}
+
+const getOrder = (id) => {
+  return new Promise((resolve, reject) => {
+    connection.query('SELECT * FROM shop WHERE id = ?', [id], (error, results, fields) => {
       resolve(results[0]);
     });
   });
@@ -42,6 +70,8 @@ const randomString = (length) => {
 module.exports = { 
   logged: logged,
   randomString: randomString,
+  getShopOrdersValue: getShopOrdersValue,
   getTransactions: getTransactions,
+  getOrder: getOrder,
   getUser: getUser
 }

@@ -30,62 +30,112 @@
     <div id="page"></div>
     <script src="js/nav-loader.js"></script>
     <div class="modal fade" id="placeOrderModal" tabindex="-1" role="dialog" aria-labelledby="placeOrderModal" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="purchaseModalLabel">Place a Product</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="form form-horizontal mx-2">
-            <div id="response-deposit"><br></div>
-            <br>
-            <div class="form-body">
-              <div class="row">
-                <div class="col-12 col-md-7">
-                  <div class="form-group row">
-                    <label class="col-2 label-control" for="projectinput1">SF Tokens</label>
-                    <fieldset class="col-10">
-                      <div class="input-group">
-                        <input type="number" class="form-control" value="0" aria-describedby="basic-addon4" id="eth-deposit-input">
-                        <div class="input-group-append">
-                          <span class="input-group-text" id="basic-addon4"><i class="icon-layers"></i></span>
+      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="purchaseModalLabel">Place a Product</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="form form-horizontal mx-2">
+              <div id="response"><br></div>
+              <br>
+              <div class="form-body">
+                <div class="row">
+                  <div class="col-12 col-md-7">
+                    <div class="form-group row">
+                      <label class="col-2 label-control" for="projectinput1">SF Tokens</label>
+                      <fieldset class="col-10">
+                        <div class="input-group">
+                          <input type="number" class="form-control" placeholder="" ="0" aria-describedby="basic-addon4" id="sf-amount">
+                          <div class="input-group-append">
+                            <span class="input-group-text" id="basic-addon4"><i class="icon-layers"></i></span>
+                          </div>
                         </div>
-                      </div>
-                    </fieldset>
-                  </div>
-                  <br>
-                  <div class="form-group row">
-                    <label class="col-2 label-control" for="projectinput1">Price</label>
-                    <fieldset class="col-10">
-                      <div class="input-group">
-                        <input type="number" class="form-control" value="0" aria-describedby="basic-addon4" id="eth-deposit-input">
-                        <div class="input-group-append">
-                          <span class="input-group-text" id="basic-addon4"><i class="la la-dollar"></i></span>
+                      </fieldset>
+                    </div>
+                    <br>
+                    <div class="form-group row">
+                      <label class="col-2 label-control" for="projectinput1">Price</label>
+                      <fieldset class="col-10">
+                        <div class="input-group">
+                          <input type="number" class="form-control" placeholder="" ="0" aria-describedby="basic-addon4" id="sf-price">
+                          <div class="input-group-append">
+                            <span class="input-group-text" id="basic-addon4"><i class="la la-dollar"></i></span>
+                          </div>
                         </div>
-                      </div>
-                    </fieldset>
+                      </fieldset>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+            <br>
+            <button type="button" class="btn btn-warning round mr-1 mb-0" style="float:right" id="place-order">Create</button>
+            <br>
+            <br>
+            <h6 class="mx-1">guide</h6>
+            <ol>
+              <li>Insert how many tokens do you want to buy.</li>
+              <li>Insert the price for them.</li>
+              <li>Click create.</li>
+            </ol>
           </div>
-          <br>
-          <button type="button" class="btn btn-warning round mr-1 mb-0" style="float:right" id="deposit-eth-button">Create</button>
-          <br>
-          <br>
-          <h6 class="mx-1">guide</h6>
-          <ol>
-            <li>Insert how many tokens do you want to buy.</li>
-            <li>Insert the price for them.</li>
-            <li>Click create.</li>
-          </ol>
         </div>
       </div>
     </div>
-  </div>
+    <div class="modal fade" id="purchaseOrderModal" tabindex="-1" role="dialog" aria-labelledby="purchaseOrderModal" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="purchaseOrderLabel">Purchase</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="form form-horizontal mx-2">
+              <div id="response-purchase"><br></div>
+              <br>
+              <div class="form-body">
+                <div class="row">
+                  <div class="col-12 col-md-7">
+                    <div class="form-group row">
+                      <label class="col-2 label-control" for="projectinput1">SF Tokens</label>
+                      <fieldset class="col-10">
+                        <div class="input-group">
+                          <input type="number" class="form-control" disabled aria-describedby="basic-addon4" id="sf-amount-purchase">
+                          <div class="input-group-append">
+                            <span class="input-group-text" id="basic-addon4"><i class="icon-layers"></i></span>
+                          </div>
+                        </div>
+                      </fieldset>
+                    </div>
+                    <br>
+                    <div class="form-group row">
+                      <label class="col-2 label-control" for="projectinput1">Price</label>
+                      <fieldset class="col-10">
+                        <div class="input-group">
+                          <input type="number" class="form-control" disabled aria-describedby="basic-addon4" id="sf-price-purchase">
+                          <div class="input-group-append">
+                            <span class="input-group-text" id="basic-addon4"><i class="la la-dollar"></i></span>
+                          </div>
+                        </div>
+                      </fieldset>
+                    </div>
+                    <input style="display: none;" id="sf-id-purchase">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <br>
+            <button type="button" class="btn btn-warning round mr-1 mb-0" style="float:right" id="purchase-order">Purchase</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="app-content content">
       <div class="content-wrapper">
         <div class="btn-group float-md-right"><a style="cursor: pointer;" class="btn-gradient-secondary btn-sm white" data-toggle="modal" data-target="#placeOrderModal">Create</a></div>
@@ -93,13 +143,16 @@
           <h6 class="my-2">SHOP</h6>
           <div id="transactions">
             <div class="transactions-table-th d-none d-md-block">
-              <div class="col-10 offset-2">
+              <div class="col-12">
                 <div class="row px-1">
                   <div class="col-md-2 col-12 py-1">
                     <p class="mb-0">User</p>
                   </div>
                   <div class="col-md-2 col-12 py-1">
                     <p class="mb-0">Price</p>
+                  </div>
+                  <div class="col-md-2 col-12 py-1">
+                    <p class="mb-0">Crypto Price</p>
                   </div>
                   <div class="col-md-2 col-12 py-1">
                     <p class="mb-0">Tokens</p>
@@ -114,31 +167,9 @@
               </div>
             </div>
             <div class="transactions-table-tbody">
-              <section class="card pull-up">
-                <div class="card-content" style="cursor: pointer;">
-                  <div class="card-body">
-                    <div class="col-10 offset-2">
-                      <div class="row">
-                        <div class="col-md-2 col-12 py-1">
-                          <p class="mb-0">daniele</p>
-                        </div>
-                        <div class="col-md-2 col-12 py-1">
-                          <p class="mb-0">$ 905.98</p>
-                        </div>
-                        <div class="col-md-2 col-12 py-1">
-                          <p class="mb-0">SF 2898</p>
-                        </div>
-                        <div class="col-md-2 col-12 py-1">
-                          <p class="mb-0">03/24/2019</p>
-                        </div>
-                        <div class="col-md-2 col-12 py-1">
-                          <a href="#" class="mb-0 btn-sm btn btn-outline-success round">Available</a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </section>
+              <div id="orders-table">
+                Loading.. 
+              </div>
             </div>
           </div>
         </div>
@@ -153,6 +184,8 @@
     <!-- BEGIN MODERN JS-->
     <script src="app-assets/js/core/app-menu.js" type="text/javascript"></script>
     <script src="app-assets/js/core/app.js" type="text/javascript"></script>
+    <script src="js/config.js" type="text/javascript"></script>
+    <script src="js/shop.js" type="text/javascript"></script>
     <!-- END MODERN JS-->
     <!-- BEGIN PAGE LEVEL JS-->
     <!-- END PAGE LEVEL JS-->

@@ -85,7 +85,7 @@ const getShop = () => {
                 </div>
               </div>
             </div>
-          </section`);
+          </section>`);
       }
     });
   })

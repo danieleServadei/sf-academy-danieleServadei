@@ -29,13 +29,13 @@ const getShopOrdersValue = (userId) => {
 }
 
 const getTransactions = (userId) => {
+  let total = [];
   return new Promise((resolve, reject) => {
-    connection.query('SELECT * FROM shop WHERE id = ? AND status != "available" ORDER BY id DESC', [userId], (error, resultsShop, fields) => {
-      connection.query('SELECT * FROM shop WHERE buyerId = ? ORDER BY id DESC', [userId], (error, resultsBuyer, fields) => {
-        let result = {};
-        for(let key in resultsShop) result[key] = resultsShop[key];
-        for(let key in resultsBuyer) result[key] = resultsBuyer[key];
-        resolve(result);
+    connection.query('SELECT * FROM shop WHERE userId = ? AND status != "available" ORDER BY id DESC LIMIT 3', [userId], (error, resultsShop, fields) => {
+      connection.query('SELECT * FROM shop WHERE buyerId = ? ORDER BY id DESC LIMIT 3', [userId], (error, resultsBuyer, fields) => {
+        for(let key in resultsShop) total.push(resultsShop[key]);
+        for(let key in resultsBuyer) total.push(resultsBuyer[key]);
+        resolve(total);
       });
     });
   });

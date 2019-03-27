@@ -11,6 +11,8 @@ const bcrypt = require('bcrypt');
 // Config and credentials
 const fs = require("fs");
 const config = JSON.parse(fs.readFileSync("config.json", "utf8"));
+// MySQL DB setup
+const setup = JSON.parse(fs.readFileSync("setup.json", "utf8"));
 // Salt and Rounds for Bcrypt hashing
 const salt = config.salt;
 const rounds = config.rounds;
@@ -71,6 +73,8 @@ app.use(["/login", "/register"], (req, res, next) => {
   })
 })
 
+// Serve static pages, with their root directory
+
 app.get("/index", (req, res) => {
   res.redirect("/");
 });
@@ -113,7 +117,7 @@ app.get("/register", (req, res) => {
 
 /*
 
-API
+API structure
 /api/login # login
 /api/user # get user infos
 /api/register # register, wallet creation etc.
@@ -539,6 +543,16 @@ app.get("/api/utils/burn/:wallet/:quantity", (req, res) => {
       error: e
     })
   });
+});
+
+// configure the DB, create tables etc. NOTE: the database with name "sfacademy" must be already created.
+app.get("/api/utils/setup", (req, res) => {
+  connection.query(setup.users);
+  connection.query(setup.shop);
+  res.status(200).json({
+    code: 200,
+    message: "Tables created, app ready to use."
+  })
 });
 
 // catch 404 error

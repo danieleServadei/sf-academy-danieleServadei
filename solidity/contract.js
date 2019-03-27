@@ -54,8 +54,6 @@ const transfer = (walletBuyer, walletSeller, price) => {
         reject("Seller does not have enough tokens.");
       }
 
-      console.log(walletBuyer, walletSeller)
-
       walletBuyer = toHex(walletBuyer);
       walletSeller = toHex(walletSeller);
 

@@ -53,21 +53,6 @@ app.use(session({
   cookie: { secure: false }
 }))
 
-/*
-
-testing purposes
-
-
-
-*/
-app.use("*", (req, res, next) => {
-  req.session.userId = 1;
-  req.session.email = "daniele@gmail.com";
-  req.session.username = "daniele";
-  req.session.wallet = "pVPxsSM2qilsizBrEIU2tWYwx8v3njIhsK";
-  req.session.register_date = "03/24/2019";
-  next();
-});
 // Authentication needed middleware
 app.use(["/dashboard", "/buy-ico", "/wallet", "/shop", "/faq", "/profile"], (req, res, next) => {
   logged(req).then(() => {
@@ -85,12 +70,6 @@ app.use(["/login", "/register"], (req, res, next) => {
     next();
   })
 })
-
-app.get("/users", (req, res) => {
-  connection.query('SELECT * FROM users', (error, results, fields) => {
-    res.json(results)
-  });
-});
 
 app.get("/index", (req, res) => {
   res.redirect("/");
@@ -173,7 +152,6 @@ app.post("/api/login", (req, res) => {
           req.session.email = results[0].email;
           req.session.username = results[0].username;
           req.session.register_date = results[0].register_date;
-          req.session.eth_balance = results[0].eth_balance;
           req.session.wallet = results[0].wallet;
           res.status(200).json({
             code: 200,
@@ -238,7 +216,6 @@ app.post("/api/register", (req, res) => {
 app.get("/api/user", (req, res) => {
   const { userId } = req.session;
   getUser(userId).then((user) => {
-    req.session.eth_balance = user.eth_balance;
     res.status(200).json({
       code: 200,
       user: user
@@ -315,7 +292,6 @@ app.post("/api/deposit", (req, res) => {
 
   getUser(userId).then((user) => {
     let newEthBalance = user.eth_balance + amount;
-    req.session.eth_balance = newEthBalance;
     connection.query('UPDATE users SET eth_balance = ? WHERE id = ?;', [newEthBalance, userId], (error, results, fields) => {
       if (error) throw error;
       res.status(200).json({
@@ -342,30 +318,34 @@ app.post("/api/addFounds", (req, res) => {
     }
   });
 
-  getUser(userId).then((user) => {
+  getUser(userId)
+  .then((user) => {
     if (user.eth_balance < ETHprice) {
-      res.status(200).json({
-        code: 400,
-        error: "You do not have enough ETH in your wallet, please deposit more ETH in order to complete this transaction."
-      });
-    } else {
-      contract.addFounds(wallet, tokens).then(() => {
-        let newEthBalance = user.eth_balance - ETHprice;
-        req.session.eth_balance = newEthBalance;
-        connection.query('UPDATE users SET eth_balance = ? WHERE id = ?;', [newEthBalance, userId], (error, results, fields) => {
-          if (error) throw error;
-          res.status(200).json({
-            code: 200,
-            message: "Transaction completed successfully, you may need to wait a few minutes in order to see your balance updated."
-          });
-        });
-      }).catch((e) => {
-        res.status(200).json({
-          code: 400,
-          error: e
-        })
+      return new Promise((resolve, reject) => {
+        reject("You do not have enough ETH in your wallet, please deposit more ETH in order to complete this transaction.");
       });
     }
+    return user;
+  })
+  .then((user) => {
+    contract.addFounds(wallet, tokens)
+    return user;
+  })
+  .then((user) => {
+    let newEthBalance = user.eth_balance - ETHprice;
+    connection.query('UPDATE users SET eth_balance = ? WHERE id = ?;', [newEthBalance, userId], (error, results, fields) => {
+      if (error) throw error;
+      res.status(200).json({
+        code: 200,
+        message: "Transaction completed successfully, you may need to wait a few minutes in order to see your balance updated."
+      });
+    });
+  })
+  .catch((error) => {
+    res.status(200).json({
+      code: 400,
+      error: error
+    })
   });
 });
 
@@ -382,84 +362,77 @@ app.post("/api/order", (req, res) => {
       message: "Please fill both amount and price."
     })
   } else {
-    getShopOrdersValue(userId).then((trValue) => {
+    Promise.all([getShopOrdersValue(userId), contract.getWalletBalance(wallet)]).then(values => {
+      let [ trValue, balance ] = values;
       trValue += parseFloat(amount);
-      contract.getWalletBalance(wallet).then((balance) => {
-        if (balance < trValue) {
+      if (balance < trValue) {
+        res.status(200).json({
+          code: 400,
+          message: "You do not have enough Tokens!"
+        })
+      } else {
+        connection.query('INSERT INTO shop (userId, username, price, tokens, date) VALUES (?, ?, ?, ?, ?);', [userId, username, price, amount, date], (error, results, fields) => {
+          if (error) throw error;
           res.status(200).json({
-            code: 400,
-            message: "You do not have enough Tokens!"
+            code: 200,
+            message: "Order created!"
           })
-        } else {
-          connection.query('INSERT INTO shop (userId, username, price, tokens, date) VALUES (?, ?, ?, ?, ?);', [userId, username, price, amount, date], (error, results, fields) => {
-            if (error) throw error;
-            res.status(200).json({
-              code: 200,
-              message: "Order created!"
-            })
-          });
-        }
-      });
+        });
+      }
     });
   }
 });
 
 app.post("/api/transfer", (req, res) => {
   const { orderId, amount, price } = req.body;
-  const { wallet, eth_balance, userId } = req.session;
+  const { wallet, userId } = req.session;
   const eth_price = price*config.USDinETH;
-  if (eth_balance < eth_price) {
-    res.status(200).json({
-      code: 400,
-      message: "You do not have enough ETH deposited in your wallet to complete the transaction."
-    })
-  } else {
-    getOrder(orderId).then((order) => {
-      if (order.status == "available") {
-        getUser(order.userId).then((seller) => {
-          if (seller.id != userId) {
-            contract.transfer(wallet, seller.wallet, amount).then(() => {
 
-              new_eth_balance = eth_balance - eth_price;
-              req.session.eth_balance = new_eth_balance;
-              connection.query('UPDATE users SET eth_balance = ? WHERE id = ?', [new_eth_balance, userId]);
-              connection.query('UPDATE shop SET status = "purchased", buyerId = ? WHERE id = ?', [userId, orderId]);
+  Promise.all([getUser(userId), getOrder(orderId)]).then(values => {
+    const [ user, order ] = values;
+    if (user.eth_balance < eth_price) {
+      res.status(200).json({
+        code: 400,
+        message: "You do not have enough ETH deposited in your wallet to complete the transaction."
+      })
+    } else if (order.status == "available") {
+      getUser(order.userId)
+      .then((seller) => {
+        if (seller.id != userId) {
+          contract.transfer(wallet, seller.wallet, amount);
+          return new Promise((resolve, reject) => {
+            resolve(seller);
+          })
+        } else {
+          res.status(200).json({
+            code: 400,
+            message: "You can't buy your own order, lmao."
+          })
+        }
+      }).then((seller) => {
+        new_eth_balance = user.eth_balance - eth_price;
+        connection.query('UPDATE users SET eth_balance = ? WHERE id = ?', [new_eth_balance, userId]);
+        connection.query('UPDATE shop SET status = "purchased", buyerId = ? WHERE id = ?', [userId, orderId]);
 
-              seller_new_eth_balance = seller.eth_balance + eth_price;
-              connection.query('UPDATE users SET eth_balance = ? WHERE id = ?', [seller_new_eth_balance, seller.id], (error, results, fields) => {
-                res.status(200).json({
-                  code: 200,
-                  message: "Order purchased successfully. Your balance may take a few minutes to update."
-                });
-              });
-
-            }).catch((e) => {
-              res.status(200).json({
-                code: 400,
-                message: e
-              })
-            });
-          } else {
-            res.status(200).json({
-              code: 400,
-              message: "You can't buy your own order, lmao."
-            })
-          }
-        }).catch((e) => {
-          console.log(e);
+        seller_new_eth_balance = seller.eth_balance + eth_price;
+        connection.query('UPDATE users SET eth_balance = ? WHERE id = ?', [seller_new_eth_balance, seller.id], (error, results, fields) => {
+          res.status(200).json({
+            code: 200,
+            message: "Order purchased successfully. Your balance may take a few minutes to update."
+          });
         });
-      } else {
-        res.status(200).json({
-          code: 400,
-          message: "This order has already been purchased!"
-        })
-      }
-    });
-  }
+      })
+    } else {
+      res.status(200).json({
+        code: 400,
+        message: "This order has already been purchased!"
+      })
+    }
+  });
 });
 
 app.get("/api/shop", (req, res) => {
-  connection.query('SELECT * FROM shop ORDER BY id+0 DESC', (error, results, fields) => {
+  connection.query('SELECT * FROM shop ORDER BY id DESC', (error, results, fields) => {
     res.status(200).json({
       code: 200,
       shop: results
@@ -469,7 +442,8 @@ app.get("/api/shop", (req, res) => {
 
 app.get("/api/balance", (req, res) => {
   const { wallet } = req.session;
-  contract.getWalletBalance(wallet).then((balance) => {
+  contract.getWalletBalance(wallet)
+  .then((balance) => {
     res.status(200).json({
       code: 200,
       balance: balance
@@ -495,39 +469,38 @@ app.get("/api/ethereum/balance", (req, res) => {
 app.post("/api/burn", (req, res) => {
   const { quantity, password } = req.body;
   const { wallet, userId } = req.session;
-  getUser(userId).then((user) => {
-    bcrypt.compare(`${password}${salt}`, user.password, (err, compared) => {
-      if (compared) {
-        contract.burn(wallet, quantity).then(() => {
-          res.status(200).json({
-            code: 200,
-            message: "Tokens burned successfully. Your wallet may take a few minutes to update."
-          });
-        }).catch((e) => {
-          res.status(200).json({
-            code: 400,
-            error: e
-          })
-        });
-      } else {
-        res.status(200).json({
-          code: 400,
-          message: "Invalid Password"
-        });
-      }
+  getUser(userId)
+  .then((user) => {
+    return bcrypt.compare(`${password}${salt}`, user.password);
+  })
+  .then((compared) => {
+    if (compared) {
+      return contract.burn(wallet, quantity)
+    } else {
+      return new Promise((resolve, reject) => {
+        reject("Invalid Password");
+      });
+    }
+  })
+  .then(() => {
+    res.status(200).json({
+      code: 200,
+      message: "Tokens burned successfully. Your wallet may take a few minutes to update."
     });
-  }).catch((e) => {
+  })
+  .catch((error) => {
     res.status(200).json({
       code: 400,
-      error: e
+      error: error
     })
-  });    
+  })
 });
 
 // set smart contract tokens available, utility
 app.get("/api/utils/set/:amount", (req, res) => {
   const { amount } = req.params;
-  contract.set(amount).then(() => {
+  contract.set(amount)
+  .then(() => {
     res.status(200).json({
       code: 200,
       message: `Tokens available set to ${amount}.`
@@ -541,7 +514,8 @@ app.get("/api/utils/investors/:wallets", (req, res) => {
   wallets = wallets.split(",");
   const tokens = [10000/0.01, 25000/0.01, 100000/0.01];
 
-  contract.AirDrop(wallets, tokens).then(() => {
+  contract.AirDrop(wallets, tokens)
+  .then(() => {
     res.status(200).json({
       code: 200,
       message: `Tokens set to investors.`
@@ -552,7 +526,8 @@ app.get("/api/utils/investors/:wallets", (req, res) => {
 // burn tokens from an address, utility
 app.get("/api/utils/burn/:wallet/:quantity", (req, res) => {
   const { wallet, quantity } = req.params;
-  contract.burn(wallet, quantity).then(() => {
+  contract.burn(wallet, quantity)
+  .then(() => {
     res.status(200).json({
       code: 200,
       message: "Tokens burned successfully."

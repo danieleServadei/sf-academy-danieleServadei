@@ -9,13 +9,6 @@ burnButton.onclick = () => {
   burn();
 }
 
-document.addEventListener('keypress', (e) => {
-  let key = e.which || e.keyCode;
-  if (key === 13) {
-    updateProfile();
-  }
-});
-
 const profileInfo = () => {
   const registerDate = document.getElementById('register-date');
   const usernameInput = document.getElementById('username');
@@ -98,7 +91,7 @@ const burn = () => {
       if (response.code == 200) {
         responseBurnDiv.innerHTML = `<span style='color:#2ecc71'>${response.message}</span>`;
       } else {
-        responseBurnDiv.innerHTML = `<span style='color:#e74c3c'>${response.message}</span>`;
+        responseBurnDiv.innerHTML = `<span style='color:#e74c3c'>${response.error}</span>`;
       }
     });
   })

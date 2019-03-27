@@ -233,7 +233,8 @@ app.get("/api/user/transactions", (req, res) => {
   getTransactions(userId).then((result) => {
     res.status(200).json({
       code: 200,
-      transactions: result
+      transactions: result,
+      sessionUserId: userId
     });
   });
 })

@@ -5,11 +5,12 @@ const getTransactions = () => {
   .then((res) => {
     res.json().then((response) => {
       table.innerHTML = "";
-      const { transactions } = response;
+      const { transactions, sessionUserId } = response;
       for (let s in transactions) {
         let { username, price, tokens, date, status, buyerId } = transactions[s];
         let type;
-        if (!buyerId) {
+
+        if (buyerId != sessionUserId) {
           type = `<a href="#" class="mb-0 btn-sm btn btn-outline-success round">Sell</a>`;
         } else {
           type = `<a href="#" class="mb-0 btn-sm btn btn-outline-info round">Buy</a>`;

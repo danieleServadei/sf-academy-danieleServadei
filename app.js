@@ -9,7 +9,7 @@ const bcrypt = require('bcrypt');
 const fs = require("fs");
 const { config } = require("./config");
 // MySQL DB setup
-const setup = require("./setup");
+const { setup } = require("./setup");
 // Salt and Rounds for Bcrypt hashing
 const salt = config.salt;
 const rounds = config.rounds;

@@ -3,17 +3,17 @@ services:
   app:
     build: .
     environment:
-      mysqlHost: sdn68qne213xol.cuk841utt0wb.us-east-1.rds.amazonaws.com
-      mysqlUser: sfacademy
-      mysqlPassword: sfacademy
-      mysqlDB: sfacademy
-      salt: _n9DaX7QRwq.,xLZtqKNz,}HjCWtj(5JhDEh.8&G
-      provider: https://rinkeby.infura.io/v3/956f1f4ffb1f444d8c96da6131765c47
-      contractAddress: 0x820a64187479c4ae4f502020561192c4d1920f30
-      privateKey: a143e7c97e9c7b2db56e9ad6c74b984ca36a13035ab07a6199c4ce0637dc3409
-      defaultAccount: 0xD29f706ad134767Bd057a0dFFf0e12F1143541EB
-      etherscanLink: https://rinkeby.etherscan.io/tx/
-      ETHInUSD: 135,
+      mysqlHost: "sdn68qne213xol.cuk841utt0wb.us-east-1.rds.amazonaws.com"
+      mysqlUser: "sfacademy"
+      mysqlPassword: "sfacademy"
+      mysqlDB: "sfacademy"
+      salt: "_n9DaX7QRwq.,xLZtqKNz,}HjCWtj(5JhDEh.8&G"
+      provider: "https://rinkeby.infura.io/v3/956f1f4ffb1f444d8c96da6131765c47"
+      contractAddress: "0x820a64187479c4ae4f502020561192c4d1920f30"
+      privateKey: "a143e7c97e9c7b2db56e9ad6c74b984ca36a13035ab07a6199c4ce0637dc3409"
+      defaultAccount: "0xD29f706ad134767Bd057a0dFFf0e12F1143541EB"
+      etherscanLink: "https://rinkeby.etherscan.io/tx/"
+      ETHInUSD: 135
       USDinETH: 0.0075
       rounds: 10
     ports:

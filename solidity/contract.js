@@ -80,7 +80,11 @@ const getWalletBalance = (wallet) => {
   wallet = toHex(wallet);
   return new Promise((resolve, reject) => {
     const call = contract.methods.walletBalance(wallet).call().then((val) => {
-      resolve(val);
+      if (val.hasOwnProperty("_hex")) {
+        resolve(parseInt(val))
+      } else {
+        resolve(val);
+      }
     })
   });
 }

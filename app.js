@@ -7,12 +7,11 @@ const mysql = require("mysql");
 const bcrypt = require('bcrypt');
 // Config and credentials
 const fs = require("fs");
-const config = require("./config");
 // MySQL DB setup
 const setup = require("./setup");
 // Salt and Rounds for Bcrypt hashing
-const salt = config.salt;
-const rounds = config.rounds;
+const salt = process.env.salt;
+const rounds = process.env.rounds;
 // Body parser and Express session
 const bodyParser = require("body-parser")
 const session = require("express-session");
@@ -29,10 +28,10 @@ const dir = {
 
 // Connect to RDS DB
 const connection = mysql.createConnection({
-  host: config.mysqlHost,
-  user: config.mysqlUser,
-  password: config.mysqlPassword,
-  database: config.mysqlDB
+  host: process.env.mysqlHost,
+  user: process.env.mysqlUser,
+  password: process.env.mysqlPassword,
+  database: process.env.mysqlDB
 });
 connection.connect();
 
@@ -385,7 +384,7 @@ app.post("/api/order", (req, res) => {
 app.post("/api/transfer", (req, res) => {
   const { orderId, amount, price } = req.body;
   const { wallet, userId } = req.session;
-  const eth_price = price*config.USDinETH;
+  const eth_price = price*process.env.USDinETH;
 
   Promise.all([getUser(userId), getOrder(orderId)]).then(values => {
     const [ user, order ] = values;

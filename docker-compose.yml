@@ -2,7 +2,6 @@ version: "3"
 services:
   app:
     build: .
-    image: node:9-slim
     environment:
       mysqlHost: sdn68qne213xol.cuk841utt0wb.us-east-1.rds.amazonaws.com
       mysqlUser: sfacademy
@@ -14,6 +13,9 @@ services:
       privateKey: a143e7c97e9c7b2db56e9ad6c74b984ca36a13035ab07a6199c4ce0637dc3409
       defaultAccount: 0xD29f706ad134767Bd057a0dFFf0e12F1143541EB
       etherscanLink: https://rinkeby.etherscan.io/tx/
+      ETHInUSD: 135,
+      USDinETH: 0.0075
+      rounds: 10
     ports:
       - 80:3000
-    command: npm run dev
+    command: npm run start

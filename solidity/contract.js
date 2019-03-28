@@ -4,12 +4,13 @@ const cjson = require("cjson")
 const TX = require('ethereumjs-tx')
 // Config and credentials
 const fs = require("fs");
+const config = require(`../config`);
 // contract details
-const provider = process.env.provider;
-const contractAddress = process.env.contractAddress;
-const privateKey = new Buffer.from(process.env.privateKey, "hex");
-const defaultAccount = process.env.defaultAccount;
-const etherscanLink = process.env.etherscanLink;
+const provider = config.provider;
+const contractAddress = config.contractAddress;
+const privateKey = new Buffer.from(config.privateKey, "hex");
+const defaultAccount = config.defaultAccount;
+const etherscanLink = config.etherscanLink;
 // initiate the web3
 const web3 = new Web3(provider)
 const abi = JSON.parse(fs.readFileSync(`${__dirname}/abi.json`, "utf8"));

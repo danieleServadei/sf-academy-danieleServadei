@@ -5,7 +5,7 @@ services:
     environment:
       mysqlHost: sdn68qne213xol.cuk841utt0wb.us-east-1.rds.amazonaws.com
       mysqlUser: sfacademy
-      mysqlPassword: sfacademy,
+      mysqlPassword: sfacademy
       mysqlDB: sfacademy
       salt: _n9DaX7QRwq.,xLZtqKNz,}HjCWtj(5JhDEh.8&G
       provider: https://rinkeby.infura.io/v3/956f1f4ffb1f444d8c96da6131765c47

@@ -1,18 +1,15 @@
 // ExpressJS
 const express = require("express");
 const app = express();
-// AWS SDK
-const AWS = require("aws-sdk");
-// RDS, Mysql
-const rds = new AWS.RDS();
+// Mysql
 const mysql = require("mysql");
 // Bcrypt, hash password
 const bcrypt = require('bcrypt');
 // Config and credentials
 const fs = require("fs");
-const config = JSON.parse(fs.readFileSync("config.json", "utf8"));
+const config = require("./config");
 // MySQL DB setup
-const setup = JSON.parse(fs.readFileSync("setup.json", "utf8"));
+const setup = require("./setup");
 // Salt and Rounds for Bcrypt hashing
 const salt = config.salt;
 const rounds = config.rounds;
@@ -21,7 +18,7 @@ const bodyParser = require("body-parser")
 const session = require("express-session");
 // Functions
 const { logged, randomString, getUser, getShopOrdersValue, getOrder, getTransactions } = require("./functions");
-const port = 80;
+const port = 3000;
 // Solidity Smart Contract
 const contract = require(`${__dirname}/solidity/contract`);
 
@@ -38,9 +35,6 @@ const connection = mysql.createConnection({
   database: config.mysqlDB
 });
 connection.connect();
-
-// Load AWS credentials
-AWS.config.loadFromPath("./config.json");
 
 // Express Middleware
 app.use(bodyParser.urlencoded({

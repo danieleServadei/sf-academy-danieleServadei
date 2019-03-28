@@ -1,6 +1,6 @@
 const mysql = require("mysql");
 const fs = require("fs");
-const config = JSON.parse(fs.readFileSync("config.json", "utf8"));
+const config = require("./config");
 const connection = mysql.createConnection({
   host: config.mysqlHost,
   user: config.mysqlUser,

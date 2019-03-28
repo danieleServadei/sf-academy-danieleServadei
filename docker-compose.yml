@@ -3,7 +3,7 @@ services:
   app:
     build: .
     environment:
-      mysqlHost: "sdn68qne213xol.cuk841utt0wb.us-east-1.rds.amazonaws.com"
+      mysqlHost: "<RDS ENDPOINT>"
       mysqlUser: "sfacademy"
       mysqlPassword: "sfacademy"
       mysqlDB: "sfacademy"

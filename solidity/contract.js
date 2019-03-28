@@ -4,7 +4,7 @@ const cjson = require("cjson")
 const TX = require('ethereumjs-tx')
 // Config and credentials
 const fs = require("fs");
-const config = require(`../config`);
+const { config } = require(`../config`);
 // contract details
 const provider = config.provider;
 const contractAddress = config.contractAddress;

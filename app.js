@@ -7,7 +7,7 @@ const mysql = require("mysql");
 const bcrypt = require('bcrypt');
 // Config and credentials
 const fs = require("fs");
-const config = require("./config");
+const { config } = require("./config");
 // MySQL DB setup
 const setup = require("./setup");
 // Salt and Rounds for Bcrypt hashing

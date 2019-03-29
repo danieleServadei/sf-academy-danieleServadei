@@ -7,7 +7,6 @@ const connection = mysql.createPool({
   password: config.mysqlPassword,
   database: config.mysqlDB
 });
-connection.connect();
 
 const logged = (req) => {
   return new Promise((resolve, reject) => {

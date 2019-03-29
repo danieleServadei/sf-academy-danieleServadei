@@ -57,7 +57,7 @@ https://s3.amazonaws.com/cf-templates-1rts0b6b28ais-us-east-1/2019087INq-sf-acad
 ```
 
 Questo creerà un istanza di EC2 e un DataBase (MySQL, utilizzando RDS)
-La procedura potrebbe richiedere qualche minuto, aspetta che tutto si concluda e che appaia "CREATE_COMPLETE"
+La procedura potrebbe richiedere qualche minuto, aspetta che tutto si concluda e che appaia `CREATE_COMPLETE`
 
 ## Amazon RDS
 
@@ -96,6 +96,11 @@ git config --global user.email "<YOUR_EMAIL@EXAMPLE.COM>"
 Successivamente cloniamo la repo
 ```
 git clone https://github.com/danieleServadei/sf-academy-danieleServadei.git
+```
+
+Entriamo nella cartella della repo clonata
+```
+cd sf-academy-danieleServadei
 ```
 
 E ci muoviamo nel branch **Docker**

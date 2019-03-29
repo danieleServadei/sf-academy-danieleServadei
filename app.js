@@ -34,7 +34,6 @@ const connection = mysql.createPool({
   password: config.mysqlPassword,
   database: config.mysqlDB
 });
-connection.connect();
 
 // Express Middleware
 app.use(bodyParser.urlencoded({

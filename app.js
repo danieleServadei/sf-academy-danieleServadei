@@ -28,7 +28,7 @@ const dir = {
 };
 
 // Connect to RDS DB
-const connection = mysql.createConnection({
+const connection = mysql.createPool({
   host: config.mysqlHost,
   user: config.mysqlUser,
   password: config.mysqlPassword,
@@ -510,13 +510,20 @@ app.get("/api/utils/investors/:wallets", (req, res) => {
   wallets = wallets.split(",");
   const tokens = [10000/0.01, 25000/0.01, 100000/0.01];
 
-  contract.AirDrop(wallets, tokens)
-  .then(() => {
+  if (wallets.length <= 3) {
+    contract.AirDrop(wallets, tokens)
+    .then(() => {
+      res.status(200).json({
+        code: 200,
+        message: `Tokens set to investors.`
+      });
+    })
+  } else {
     res.status(200).json({
-      code: 200,
-      message: `Tokens set to investors.`
+      code: 400,
+      message: `You must insert only 3 investors.`
     });
-  })
+  }
 });
 
 // burn tokens from an address, utility

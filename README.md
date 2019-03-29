@@ -174,7 +174,9 @@ Per maggiori informazioni su come funziona [clicca qui](#info).
 ## Links
 
 [Utils](#utils) - Impostare Investors, Smart Contract tokens available etc.
+
 [Struttura](#struttura) - Come è strutturata l'API e il BackEnd.
+
 [Funzionamento](#funzionamento) - Come funziona il sito, cosa si può fare.
 
 
@@ -213,6 +215,7 @@ Il Frontend è situato nella directory `/pages`
 ![Frontend](https://i.imgur.com/EZRTZ2Q.png)
 
 **8** directory
+
 _N.B. non andrò ad approfondire il frontend (CSS.. ) in quanto è per un buon 80% googlato, approfondirò il backend :D_
 ```
 - app-assets
@@ -382,6 +385,7 @@ Come **comprare tokens**
 
 Per comprare dei tokens, prima di tutto devi depositare degli **ETH** nel tuo wallet.
 Visita `/buy-ico`, clicca su **Deposit**, inserisci una quantità di ETH e premi **Deposit**. Gli ETH saranno depositati immediatamente sul tuo wallet.
+
 Ora, sempre sulla pagina `/buy-ico`, clicca su **Buy** e usa il convertitore da **SF** a **ETH** per scegliere una quantità di token da comprare, poi premi **Buy**.
 I token richiedono un po' di tempo per essere accreditati nel tuo wallet.
 

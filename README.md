@@ -111,7 +111,7 @@ Ora dobbiamo modificare il file **docker-compose.yml** inserendo l'endpoint di R
 nano docker-compose.yml
 ```
 
-![Nano](https://i.imgur.com/8JW5JSG.png))
+![Nano](https://i.imgur.com/8JW5JSG.png)
 
 Modifichiamo quindi il campo **RDS ENDPOINT** con il link che abbiamo trovato prima. 
 
@@ -434,4 +434,5 @@ Successivamente c'è il contratto ICO, la parte principale.
 # Credits
 
 **Autore** [danieleServadei](https://github.com/danieleServadei)
+
 **Progetto** Sf-Academy

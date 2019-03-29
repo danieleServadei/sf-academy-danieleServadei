@@ -93,6 +93,8 @@ git config --global user.name "<YOUR_USERNAME>"
 git config --global user.email "<YOUR_EMAIL@EXAMPLE.COM>"
 ```
 
+I prossimi passi **potrebbero cambiare** in base alla repo che cloni. Se la repo che cloni ha già nel master gli update del branch docker, non serve fare `git checkout docker`.
+
 Successivamente cloniamo la repo
 ```
 git clone https://github.com/danieleServadei/sf-academy-danieleServadei.git

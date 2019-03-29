@@ -199,7 +199,10 @@ app.post("/api/register", (req, res) => {
         connection.query('INSERT INTO users (username, email, password, wallet, register_date) VALUES (?, ?, ?, ?, ?);', [username, email, hash, wallet, date], (error, results, fields) => {
           if (error) throw error;
           contract.createWallet(wallet).then(() => {
-            res.redirect("/login");
+            res.status(200).json({
+              code: 200,
+              message: "User Created"
+            });
           });
         });
       });

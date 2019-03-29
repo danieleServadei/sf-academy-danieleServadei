@@ -1,5 +1,5 @@
 const config = {
-  "url": "http://localhost",
+  "url": "",
   "ETHInUSD": 135,
   "ETHinSf": 2400,
   "sfInETH": 0.00042,

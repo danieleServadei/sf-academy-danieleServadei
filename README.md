@@ -187,7 +187,7 @@ Imposta i tre **investitori**, con rispettivamente $10K, $25K, $100K.
 Dopo aver creato i tre investitori, utilizzando la pagina di **register**, visita il seguente EndPoint per aggiornare il loro wallet
 
 ```
-http://<EC2-PUBLIC-IP>/api/utils/investors/<WALLET2>,<WALLET2>,<WALLET3>
+http://<EC2-PUBLIC-IP>/api/utils/investors/<WALLET1>,<WALLET2>,<WALLET3>
 ```
 
 ### TokensAvailable
@@ -357,7 +357,7 @@ Esempio di **Response**
 }
 ```
 
-Il messaggio può variare, a seconda dell'EndPoin, es:
+Il messaggio può variare, a seconda dell'EndPoint, es:
 
 ```javascript
 {
